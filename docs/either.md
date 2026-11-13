@@ -35,6 +35,21 @@ on `Right` and propagates `Left` unchanged. They are **strict**: unlike
 Hercules' lazy `F3`–`F10` function adapters, the callback is executed as
 soon as the operation is called on a `Right`. User exceptions are not caught.
 
+## Lossless conversion to These
+
+`toThese()` preserves the left/right choice without inventing a Both case:
+
+```java
+Either<String, Integer> source = Either.left("warning");
+These<String, Integer> evidence = source.toThese();
+// These.This("warning"), not an error or a Neither case
+```
+
+This is a **one-way widening**: converting an arbitrary `These`
+back to `Either` would require a policy for `Both` and could discard
+information. Mapping and swapping either before or after this conversion
+produce equivalent values; Instancio law tests check the coherence.
+
 ## Other operations
 
 ```java

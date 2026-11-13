@@ -52,6 +52,25 @@ All methods are **strict**. Callbacks are checked for null immediately;
 only the callback(s) for the present values execute. User exceptions
 propagate unchanged. At least one side is always present.
 
+## Lossless conversion to Those
+
+`toThose()` preserves all three variants while adding the possibility
+of an absence explanation for future values:
+
+```java
+These<String, Integer> observations = These.both("sensor A", 42);
+Those<String, Integer, String> evidence = observations.toThose();
+// Those.Both("sensor A", 42)
+```
+
+The generic third type parameter `E` specifies the future explanation
+type; the conversion never invents a `Neither(E)`. It commutes with
+`map`, `mapLeft`, `bimap`, and `swap`, verified using Instancio.
+Converting a general `Those` back to `These` is not inherently
+lossless, because `Neither(E)` carries an explanation that `These`
+cannot represent. The existing `Those.toEither()` remains a lossless
+equivalence with `Either<E, These<L,R>>`.
+
 ## Right-biased flatMap with explicit left accumulation
 
 Unlike `Either`, `These` may already contain a left value when it

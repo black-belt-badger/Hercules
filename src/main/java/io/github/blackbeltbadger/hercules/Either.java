@@ -80,6 +80,17 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
         return fold(Either::right, Either::left);
     }
 
+    /**
+     * Embed either alternative in the inclusive-or type without losing information.
+     * Left becomes {@link These.This}; Right becomes {@link These.That}.
+     * This conversion does not manufacture a {@link These.Both} value.
+     *
+     * @return the corresponding left-only or right-only These value
+     */
+    default These<L, R> toThese() {
+        return fold(These::left, These::right);
+    }
+
     /** Return the right value, or the supplied fallback if left. */
     default R getOrElse(R fallback) {
         return fold(left -> fallback, Function.identity());
