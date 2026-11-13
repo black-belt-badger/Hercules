@@ -20,7 +20,7 @@
 - **These**: inclusive-or `These<L,R>` with `This`, `That` and `Both`, preserving both data and diagnostics. Includes right-biased `flatMap` with an explicit associative left combiner. See the [These guide](docs/these.md).
 - **Those**: four-way `Those<L,R,E>` with `This`, `That`, `Both`, and typed `Neither(E)` for informative absence. Maps all payloads and converts losslessly to `Either<E, These<A,B>>`. See the [Those guide](docs/those.md).
 - **Explicit choice**: `EitherChoice<L>` supports leftmost-success fallback and ordered accumulation of failed alternatives using a caller-provided identity and combiner. This is a concrete choice monoid, not a universal higher-kinded `Alternative`. See the [choice guide](docs/choice.md).
-- **Accumulating validation**: `Validation<E,A>` with `Valid`/`Invalid` and `ValidationApplicative<E>` for independent checks, lawful `pure`/`ap`/`map2`, and explicit error accumulation. See the [Validation guide](docs/validation.md).
+- **Accumulating validation**: `Validation<E,A>` with `Valid`/`Invalid` and `ValidationApplicative<E>` for independent checks, lawful `pure`/`ap`/`map2`, and explicit error accumulation, plus ordered `sequence` and `traverse` for many independent checks. See the [Validation guide](docs/validation.md).
 
 ## Areas under consideration
 
