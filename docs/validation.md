@@ -120,8 +120,9 @@ two independent results without writing a curried function.
 The operations themselves are eager/strict; they **do not** automatically
 schedule checks in parallel, defer side effects, catch exceptions, or
 cancel work. They only combine their completed `Validation` arguments.
-For parallel asynchronous checks and cancellation, see the later
-`CompletionStage` work in #9.
+For independently supplied asynchronous checks, use the stage
+composition methods documented below. Scheduling, recovery and
+cancellation remain the caller's responsibilities.
 
 ## Arity-aware map3 through map10
 
@@ -233,6 +234,110 @@ no new typeclass hierarchy. `sequence` is equivalent to traversing
 the validation objects with `Function.identity()`; `traverse(xs,
 Validation::valid)` yields a valid list of the original values.
 
+## Independently supplied CompletionStage results
+
+`ValidationApplicative<E>` can combine already-created JDK
+`CompletionStage<Validation<E,A>>` values without blocking or
+scheduling new work.
+
+```java
+record Quote(String symbol, int quantity) {}
+
+CompletableFuture<Validation<List<String>, String>> symbol =
+        new CompletableFuture<>();
+CompletableFuture<Validation<List<String>, Integer>> quantity =
+        new CompletableFuture<>();
+
+CompletionStage<Validation<List<String>, Quote>> combined =
+        app.map2Stages(symbol, quantity, Quote::new);
+
+// These stages might be completed by independent APIs or executors.
+quantity.complete(Validation.invalid(List.of("quantity invalid")));
+symbol.complete(Validation.invalid(List.of("symbol invalid")));
+
+// The caller chooses when (or whether) to await the result.
+var result = combined.toCompletableFuture().join();
+// Invalid(["symbol invalid", "quantity invalid"])
+```
+
+The new APIs are **`map2Stages(left, right, mapper)`** and
+**`sequenceStages(Iterable<CompletionStage<Validation<...>>>)`**.
+Both use JDK `thenCombine`, delegating every ordinary pairwise
+validation result to the same `map2` algebra. With two normally
+completed stages, `map2Stages` invokes its mapper once only when
+both are `Valid`. Multiple normally completed `Invalid` values
+combine their errors in the supplied **argument order**, not the
+temporal completion order.
+
+`sequenceStages` enumerates a **finite iterable once at
+registration time**, builds a dependent chain and returns immediately
+without waiting for completion. An empty iterable produces an
+already-completed `Valid([])`. When all stages complete normally,
+it returns either every validation failure in **input encounter
+order**, or a shallowly immutable snapshot of all successful
+payloads. Explicitly nullable result payloads are preserved.
+
+```java
+CompletionStage<Validation<List<String>, List<Integer>>> checks =
+        app.sequenceStages(List.of(
+                CompletableFuture.completedFuture(
+                        Validation.<List<String>, Integer>valid(10)),
+                CompletableFuture.completedFuture(
+                        Validation.<List<String>, Integer>invalid(
+                                List.of("invalid limit")))));
+```
+
+### Three different failure channels
+
+| Event | Result |
+| --- | --- |
+| Both/all stages complete normally with `Valid` | Normal `Valid` completion |
+| Any stage completes normally with `Invalid` | Normal `Invalid` completion, accumulating errors from other normal `Invalid` results |
+| A stage completes exceptionally, including cancellation | Dependent stage completes exceptionally, **not** `Invalid` |
+| User mapper or error combiner throws | Dependent stage completes exceptionally |
+| Stage completes normally with a null `Validation` object | Dependent stage completes exceptionally with a null-contract failure |
+
+Java exceptions, connection loss, timeouts and cancellation are
+**execution-level concerns**, not arbitrary domain validation errors.
+If two source stages complete exceptionally, JDK `CompletionStage`
+does not promise which exception is exposed by their combination.
+There is no automatic aggregation of exceptions into an `E` payload.
+
+### Scheduling, cancellation and evaluation
+
+The caller supplies the stages and decides how they start. Hercules
+does **not** invoke `supplyAsync`, allocate an executor, call
+`join`/`get`, launch tasks or catch their exceptions. A non-async
+`thenCombine` continuation executes under its stage
+implementation's execution policy; it may run on a completion thread.
+
+This is also **not a cancellation framework**: cancelling a returned
+`CompletableFuture` does not cancel either source stage. Cancelling
+a source is exceptional completion, not `Invalid`. There is no
+promise to cancel siblings or await all stages after an exceptional
+completion. These properties are intentional—higher layers own
+timeouts, retries, batch cancellation and recovery.
+
+Null stage references and a null mapper fail **at method call time**.
+A null Validation object supplied by a stage is rejected **when that
+stage completes normally**, making the dependent stage exceptional.
+An exception thrown while enumerating the input iterable is thrown
+during registration, rather than converted into a stage result.
+
+### Choosing the right JDK abstraction
+
+- Use plain JDK `thenCombine` when both stages compute ordinary
+  results and no accumulation of independent domain errors is needed.
+- Use `map2Stages` to combine **heterogeneous** validated results;
+  use `sequenceStages` for a variable number of **homogeneous**
+  validated stages.
+- Use synchronous `map2` / `sequence` when all Validation objects
+  are already available; do not wrap those values in futures solely
+  to call asynchronous APIs.
+- `Optional` can describe an absent value, but it cannot represent
+  typed, ordered error accumulation or distinguish failed validation
+  from exceptional stage completion.
+
 ## Nullness and mutability
 
 The package uses JSpecify `@NullMarked`. If an application explicitly
@@ -261,10 +366,10 @@ rather than the independent accumulation that distinguishes this type.
 Hercules therefore leaves `flatMap` out of this increment instead of
 promising incompatible algebraic laws.
 
-Asynchronous `CompletionStage` combinations remain a separate #9
-subtask; concurrent composition must state ordering, exception and
-cancellation semantics explicitly. Synchronous `map3`–`map10`
-are implemented above.
+For independently executing work, `map2Stages` and `sequenceStages`
+combine normally completed validations without converting stage
+exceptions into `Invalid` values. They do not introduce a cancellation
+or execution policy. Synchronous `map3`–`map10` are described above.
 
 ## Verification
 
@@ -283,8 +388,11 @@ single traversal, immutable results and error propagation.
 arity three through ten with Instancio-generated values and checks
 error order, exactly-once mapping, error/mapper exceptions, non-null
 container contracts and nullable result types. `ValidationPublicApiTest`,
-`ValidationTraversalPublicApiTest`, and `ValidationMapNPublicApiTest`
-compile and run from an independent Java package.
+`ValidationTraversalPublicApiTest`, `ValidationMapNPublicApiTest`,
+and `ValidationStagesPublicApiTest` compile and run from an independent
+Java package. `ValidationStagesTest` covers reverse completion order,
+exceptional and cancelled stages, null structural results, pure
+collection behavior and immutable outputs.
 
 ```bash
 ./mvnw -B -ntp clean verify
@@ -292,4 +400,4 @@ compile and run from an independent Java package.
 
 Java 17 is the baseline; CI also verifies Java 21 and Java 25.
 Parent: #9. Accumulating Applicative: #39; sequence/traverse: #54;
-arity-aware map3–map10: #56.
+arity-aware map3–map10: #56; CompletionStage composition: #61.

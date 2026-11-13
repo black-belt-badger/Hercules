@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -144,6 +146,87 @@ public record ValidationApplicative<E extends @Nullable Object>(@NonNull BinaryO
 
         return accumulated.map(successes ->
                 Collections.unmodifiableList(new ArrayList<>(successes)));
+    }
+
+    /**
+     * Combine the normal results of two independently supplied asynchronous stages.
+     *
+     * <p>This method starts no work and never blocks. It registers a JDK
+     * {@link CompletionStage#thenCombine(CompletionStage, BiFunction)}
+     * continuation: when both supplied stages complete normally with non-null
+     * Validation objects, the existing {@link #map2(Validation, Validation, BiFunction)}
+     * accumulates their errors in <em>argument order</em>, regardless of
+     * completion order. The mapper runs only when both values are Valid.
+     *
+     * <p>A null stage reference or mapper is rejected immediately. A null
+     * Validation stage result or exception thrown by the mapper/combiner
+     * completes the dependent stage exceptionally. Source stage exceptions
+     * and cancellation stay exceptional; none become an Invalid payload.
+     * No cancellation propagation or executor policy is introduced.
+     *
+     * @param <A> successful left value type
+     * @param <B> successful right value type
+     * @param <R> successful combined value type
+     * @param left already-created left stage
+     * @param right already-created right stage
+     * @param mapper function invoked only when both validations are Valid
+     * @return a dependent stage with accumulated Validation results
+     */
+    public <A extends @Nullable Object, B extends @Nullable Object, R extends @Nullable Object>
+    CompletionStage<Validation<E, R>> map2Stages(
+            @NonNull CompletionStage<? extends Validation<E, A>> left,
+            @NonNull CompletionStage<? extends Validation<E, B>> right,
+            @NonNull BiFunction<? super A, ? super B, ? extends R> mapper) {
+        return left.thenCombine(right, (first, second) -> map2(
+                Objects.requireNonNull(first, "left stage returned null Validation"),
+                Objects.requireNonNull(second, "right stage returned null Validation"),
+                mapper));
+    }
+
+    /**
+     * Combine the normal results of a finite ordered iterable of stages.
+     *
+     * <p>The iterable is consumed once at registration time, without waiting
+     * for any stages and without starting them. Every supplied stage is
+     * registered, even if earlier results are Invalid. When all stages
+     * complete normally, their validation errors are combined in iterable
+     * order, not completion order. An empty iterable returns an already
+     * completed Valid containing an empty immutable list. Successful
+     * payloads retain their order and are exposed through an immutable
+     * defensive list copy, including explicitly nullable payloads.
+     *
+     * <p>Null iterable and stage references fail synchronously when
+     * encountered. Null Validation results, or exceptions from combining
+     * errors, complete the dependent stage exceptionally. Exceptional or
+     * cancelled source stages do not become Invalid and are not recovered;
+     * cancellation of the result does not cancel inputs. Neither work
+     * scheduling nor an executor/cancellation policy is implied. Infinite
+     * input iterables do not terminate registration.
+     *
+     * @param <A> successful element type
+     * @param stages finite iterable of independently supplied stages
+     * @return a dependent stage with an immutable list of valid payloads
+     *         or all normally produced validation errors
+     */
+    public <A extends @Nullable Object> CompletionStage<Validation<E, List<A>>> sequenceStages(
+            @NonNull Iterable<? extends CompletionStage<? extends Validation<E, ? extends A>>> stages) {
+        CompletionStage<Validation<E, ArrayList<A>>> accumulated =
+                CompletableFuture.completedFuture(pure(new ArrayList<>()));
+
+        for (CompletionStage<? extends Validation<E, ? extends A>> stage : stages) {
+            CompletionStage<? extends Validation<E, ? extends A>> current =
+                    Objects.requireNonNull(stage, "sequenceStages encountered null stage");
+            accumulated = accumulated.thenCombine(current, (previous, next) ->
+                    map2(previous,
+                            Objects.requireNonNull(next, "stage returned null Validation"),
+                            (values, value) -> {
+                                values.add(value);
+                                return values;
+                            }));
+        }
+
+        return accumulated.thenApply(result ->
+                result.map(values -> Collections.unmodifiableList(new ArrayList<>(values))));
     }
 
     // BEGIN generated map3-map10 (scripts/generate_validation_mapn.py)
