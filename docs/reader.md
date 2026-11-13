@@ -180,9 +180,10 @@ and lambda shape. No depth ceiling or guaranteed safe depth is
 promised beyond normal JVM behavior.
 
 For 100,000 sequential operations, use an **ordinary iterative
-loop** instead of recursively nested Readers. A separately
-designed Trampoline (#4) can support explicitly deferred recursive
-computations. If practical Reader workloads demand deep stack-safe
+loop** instead of recursively nested Readers. The separately
+implemented [Trampoline](trampoline.md) (#4) supports explicitly
+deferred recursive computations, but does not automatically change
+Reader's own nested-lambda evaluation semantics. If practical Reader workloads demand deep stack-safe
 composition, a future iteration can evaluate a defunctionalized
 Reader representation with an explicit continuation stack; it
 should be reviewed on its type-safety and allocation merits rather

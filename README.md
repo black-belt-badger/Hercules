@@ -25,10 +25,11 @@
 - **Writer**: `Writer<W,A>` and `WriterPolicy<W>` for pure, strictly ordered value-plus-output composition with an explicit identity and associative combiner. Works naturally with `DList<Diagnostic>`, including deep stack-safe bind loops; no logging I/O is performed. See the [Writer guide](docs/writer.md).
 - **Reader**: `Reader<R,A>` for explicit configuration/context-dependent computations, with lazy `run`, `map`, `flatMap`, `ask`, `asks`, `local` and `pure`. Deep nested composition is subject to the JVM stack limit; see the [Reader guide](docs/reader.md) and the runnable depth probe.
 - **State**: `State<S,A>` for explicit immutable state transitions with `run`, `eval`, `exec`, `map`, `flatMap`, `get`, `put`, `modify`, `gets` and `pure`. Dependent computations receive updated state; `State.Result<S,A>` and non-null `State.Unit` express transitions. See the [State guide](docs/state.md).
+- **Stack-safe Trampoline**: `Trampoline<A>` with `done`, `more`, `map`, `flatMap` and iterative `run` for tail and mutual recursion as well as million-step bind chains. A private typed bind node avoids nested Java calls and unchecked casts. This is synchronous, not an async runtime. Includes a loop/allocations benchmark; see the [Trampoline guide](docs/trampoline.md).
 
 ## Areas under consideration
 
-Trampolines; general `Alternative`, broader Applicative composition, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types. Generic choice/aggregation semantics for `Those` remain an explicit research topic.
+General `Alternative`, broader Applicative composition, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types. Generic choice/aggregation semantics for `Those` remain an explicit research topic.
 
 All remaining items are **proposals** until implemented and validated. Inclusion in this list does not imply a committed public API.
 
@@ -58,7 +59,7 @@ JSpecify `@NullMarked` is enabled for the initial package. **NullAway checks the
 
 ## Status
 
-`F3`–`F10`, `Either`, `These`, `Those`, `EitherChoice`, accumulating `Validation`, persistent `DList`, `Writer`, `Reader` and `State` implemented. No published release yet.
+`F3`–`F10`, `Either`, `These`, `Those`, `EitherChoice`, accumulating `Validation`, persistent `DList`, `Writer`, `Reader`, `State` and stack-safe `Trampoline` implemented. No published release yet.
 
 ## License
 

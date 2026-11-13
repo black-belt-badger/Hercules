@@ -185,7 +185,8 @@ no fixed depth guarantee is claimed. A loop that constructs and
 **executes independent, small transitions sequentially**, carrying
 the state explicitly between iterations, can process arbitrarily
 many steps without nested lambda calls. For stack-safe recursive
-evaluation, consider the separately scoped **Trampoline #4**;
+evaluation, consider the separately implemented
+[Trampoline](trampoline.md) (#4);
 a fully defunctionalized State interpreter should be justified
 and reviewed separately rather than added with unchecked casts.
 
