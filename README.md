@@ -22,10 +22,11 @@
 - **Explicit choice**: `EitherChoice<L>` supports leftmost-success fallback and ordered accumulation of failed alternatives using a caller-provided identity and combiner. This is a concrete choice monoid, not a universal higher-kinded `Alternative`. See the [choice guide](docs/choice.md).
 - **Accumulating validation**: `Validation<E,A>` with `Valid`/`Invalid` and `ValidationApplicative<E>` for independent checks, lawful `pure`/`ap`/`map2`, ordered `sequence`/`traverse` for many checks, arity-aware `map3`–`map10` using `F3`–`F10`, and `CompletionStage` composition (`map2Stages`/`sequenceStages`) for independently supplied asynchronous checks. Normal validation failures accumulate; exceptional completion remains exceptional. See the [Validation guide](docs/validation.md).
 - **Persistent difference lists**: `DList<A>` with constant-time `cons`, `snoc` and `append`, immutable source snapshots and stack-safe iterative materialization into an unmodifiable JDK `List`. Includes a manual allocation/timing benchmark and diagnostic-accumulation example. See the [DList guide](docs/dlist.md).
+- **Writer**: `Writer<W,A>` and `WriterPolicy<W>` for pure, strictly ordered value-plus-output composition with an explicit identity and associative combiner. Works naturally with `DList<Diagnostic>`, including deep stack-safe bind loops; no logging I/O is performed. See the [Writer guide](docs/writer.md).
 
 ## Areas under consideration
 
-`Reader`, `Writer`, and `State`; trampolines; general `Alternative`, broader Applicative composition, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types. Generic choice/aggregation semantics for `Those` remain an explicit research topic.
+`Reader` and `State`; trampolines; general `Alternative`, broader Applicative composition, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types. Generic choice/aggregation semantics for `Those` remain an explicit research topic.
 
 All remaining items are **proposals** until implemented and validated. Inclusion in this list does not imply a committed public API.
 
@@ -55,7 +56,7 @@ JSpecify `@NullMarked` is enabled for the initial package. **NullAway checks the
 
 ## Status
 
-`F3`–`F10`, `Either`, `These`, `Those`, `EitherChoice`, accumulating `Validation`, and persistent `DList` implemented. No published release yet.
+`F3`–`F10`, `Either`, `These`, `Those`, `EitherChoice`, accumulating `Validation`, persistent `DList`, and `Writer` implemented. No published release yet.
 
 ## License
 
