@@ -21,6 +21,8 @@ jobs:
           distribution: temurin
           java-version: ${{ matrix.java }}
           cache: maven
+      - name: Verify reproducible generated sources and tests
+        run: python3 scripts/verify_generated.py --self-test
       - name: Verify Java 17-compatible library
         run: ./mvnw -B -ntp verify
       - name: Prove JSpecify contracts fail compilation when violated
