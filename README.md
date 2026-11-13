@@ -19,10 +19,11 @@
 - **Either**: right-biased `Either<L,R>` with sealed `Left` and `Right` records, `map`, `mapLeft`, `flatMap`, `bimap`, `fold`, `swap`, recovery and explicit optional conversion. See the [Either guide](docs/either.md).
 - **These**: inclusive-or `These<L,R>` with `This`, `That` and `Both`, preserving both data and diagnostics. Includes right-biased `flatMap` with an explicit associative left combiner. See the [These guide](docs/these.md).
 - **Those**: four-way `Those<A,B,E>` with `This`, `That`, `Both`, and typed `Neither(E)` for informative absence. Maps all payloads and converts losslessly to `Either<E, These<A,B>>`. See the [Those guide](docs/those.md).
+- **Explicit choice**: `EitherChoice<L>` supports leftmost-success fallback and ordered accumulation of failed alternatives using a caller-provided identity and combiner. This is a concrete choice monoid, not a universal higher-kinded `Alternative`. See the [choice guide](docs/choice.md).
 
 ## Areas under consideration
 
-`Reader`, `Writer`, and `State`; trampolines; `Alternative`, Applicative, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types. Generic choice/aggregation semantics for `Those` remain an explicit research topic.
+`Reader`, `Writer`, and `State`; trampolines; general `Alternative`, Applicative, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types. Generic choice/aggregation semantics for `Those` remain an explicit research topic.
 
 All remaining items are **proposals** until implemented and validated. Inclusion in this list does not imply a committed public API.
 
@@ -50,7 +51,7 @@ JSpecify `@NullMarked` is enabled for the initial package. JSpecify annotations 
 
 ## Status
 
-`F3`–`F10`, `Either`, `These`, and `Those` implemented. No published release yet.
+`F3`–`F10`, `Either`, `These`, `Those`, and concrete `EitherChoice` implemented. No published release yet.
 
 ## License
 
