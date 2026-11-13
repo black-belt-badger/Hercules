@@ -85,6 +85,22 @@ nullable payloads and the `Neither` explanation. You can also compose
 `Either` and `These` directly if they express your domain more clearly;
 you do not need to adopt a dedicated `Those` type.
 
+## Composing the information-preserving embeddings
+
+There is a consistent widening chain:
+
+```java
+Either<String, Integer> source = Either.left("observation A");
+Those<String, Integer, String> evidence = source.toThese().toThose();
+// Those.This("observation A"), NOT Those.Neither("observation A")
+```
+
+An `Either.Left` becomes left evidence in `These` and `Those`.
+It does **not** become `Neither(E)`: these cases have different
+meanings. Both widening steps preserve values and variants without
+inventing missing data, and their mapping/swapping coherence laws are
+checked with Instancio.
+
 ## Why there is deliberately no combine or flatMap
 
 Consider `Neither("A timed out")` and `That(dataFromB)`.

@@ -81,6 +81,18 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
     }
 
     /**
+     * Embed this inclusive choice in Those without losing evidence.
+     * None of the three variants becomes {@link Those.Neither};
+     * the type parameter E is for a potential later absence explanation.
+     *
+     * @param <E> explanation type of the target Those; no explanation is created
+     * @return the corresponding This, That or Both variant
+     */
+    default <E> Those<L, R, E> toThose() {
+        return fold(Those::left, Those::right, Those::both);
+    }
+
+    /**
      * Right-biased, diagnostic-preserving bind using an explicit left combiner.
      *
      * <p>On {@link This}, do not evaluate the binder. On {@link That}, use
