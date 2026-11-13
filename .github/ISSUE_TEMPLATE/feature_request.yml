@@ -1,0 +1,31 @@
+name: Feature request
+description: Propose an independently adoptable functional programming abstraction.
+title: "[Feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Problem and usage scenario
+      description: What can a normal Java client do better with the new capability?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API or semantics
+      description: Include a short Java 17 example and dependencies, if known.
+    validations:
+      required: true
+  - type: textarea
+    id: laws
+    attributes:
+      label: Laws, invariants and tests
+      description: Explain any algebraic laws and expected failures.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Simpler JDK alternatives
+      description: Why are existing Java facilities not sufficient?
