@@ -11,7 +11,7 @@ Thank you for helping build **Hercules**, an incremental functional programming 
 - Use `bbb.hercules` as the canonical Java package root. BBB projects follow `bbb.<project>`; Maven group coordinates are a separate publication concern.
 - Use lowercase GitHub repository names for BBB projects; use kebab-case when a name has multiple words (for example, `personal-mentat`). Project names in prose and branding can retain capitalization.
 - Keep the functional core pure. Describe effects (including diagnostic logging) as data; execute I/O only at explicit boundaries.
-- Only Guava, Lombok and JSpecify are currently approved production dependencies; changes to dependency policy require review.
+- Approved direct dependencies are Guava (`compile`, reserved for morphisms #14), JSpecify (`compile`), and Lombok (`provided`/annotation processor). JUnit and Instancio are test-only. Changes require review; see [dependency policy](docs/dependencies.md).
 
 ## Build and test
 

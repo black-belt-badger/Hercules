@@ -36,6 +36,8 @@
     </properties>
 
     <dependencies>
+        <!-- Retained for the planned Tree/Layer morphism API (#14): public ImmutableList types. -->
+        <!-- Existing production sources do not depend on Guava yet; see docs/dependencies.md. -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
