@@ -8,6 +8,7 @@ Thank you for helping build **Hercules**, an incremental functional programming 
 - Open or link an issue before changing a public API; discuss semantics and algebraic laws.
 - Aim for one focused, reviewable pull request per issue.
 - Prefer standard JDK interfaces, independent utilities, and explicit immutable inputs/outputs.
+- Use `bbb.hercules` as the canonical Java package root. BBB projects follow `bbb.<project>`; Maven group coordinates are a separate publication concern.
 - Keep the functional core pure. Describe effects (including diagnostic logging) as data; execute I/O only at explicit boundaries.
 - Only Guava, Lombok and JSpecify are currently approved production dependencies; changes to dependency policy require review.
 

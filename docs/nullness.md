@@ -131,6 +131,7 @@ defensive validation.
 - Verify on Java 17, 21 and 25, including Javadocs; keep a
   separate-package consumer test where useful.
 
-A future Java-package rename to `bbb.hercules` (#36) must relocate
-`package-info.java` and preserve this policy. Static nullness
-analysis is #41. This policy was established in #35.
+The canonical Java package is `bbb.hercules` (#36); its relocated
+`package-info.java` retains `@NullMarked`. New subpackages require their
+own package-level nullness declaration. Static nullness analysis is #41.
+The policy was established in #35.

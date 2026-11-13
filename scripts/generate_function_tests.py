@@ -2,7 +2,7 @@
 """Generate law and behavior tests for all F3–F10 arities."""
 from pathlib import Path
 
-PKG = "io.github.blackbeltbadger.hercules"
+PKG = "bbb.hercules"
 DEST = Path(__file__).resolve().parents[1] / "src/test/java" / PKG.replace(".", "/")
 LETTERS = "ABCDEFGHIJ"
 
