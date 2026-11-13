@@ -9,6 +9,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An explicit error-accumulation policy for independent {@link Validation}
@@ -27,7 +28,7 @@ import lombok.NonNull;
  * @param <E> validation error payload type
  * @param combineErrors associative error-combination operation
  */
-public record ValidationApplicative<E>(@NonNull BinaryOperator<E> combineErrors) {
+public record ValidationApplicative<E extends @Nullable Object>(@NonNull BinaryOperator<E> combineErrors) {
 
     /**
      * Lift a value into the valid case.
@@ -36,7 +37,7 @@ public record ValidationApplicative<E>(@NonNull BinaryOperator<E> combineErrors)
      * @param value successful payload
      * @return a valid validation
      */
-    public <A> Validation<E, A> pure(A value) {
+    public <A extends @Nullable Object> Validation<E, A> pure(A value) {
         return Validation.valid(value);
     }
 
@@ -56,7 +57,7 @@ public record ValidationApplicative<E>(@NonNull BinaryOperator<E> combineErrors)
      * @param mapper function applied only when both validations succeed
      * @return Valid of the mapped result, or Invalid of accumulated errors
      */
-    public <A, B, R> Validation<E, R> map2(
+    public <A extends @Nullable Object, B extends @Nullable Object, R extends @Nullable Object> Validation<E, R> map2(
             @NonNull Validation<E, A> left,
             @NonNull Validation<E, B> right,
             @NonNull BiFunction<? super A, ? super B, ? extends R> mapper) {
@@ -79,7 +80,7 @@ public record ValidationApplicative<E>(@NonNull BinaryOperator<E> combineErrors)
      * @param value validated input
      * @return a valid mapped result, or accumulated invalid errors
      */
-    public <A, B> Validation<E, B> ap(
+    public <A extends @Nullable Object, B extends @Nullable Object> Validation<E, B> ap(
             @NonNull Validation<E, ? extends Function<? super A, ? extends B>> function,
             @NonNull Validation<E, A> value) {
         return map2(function, value, (mapper, input) -> mapper.apply(input));
@@ -101,7 +102,7 @@ public record ValidationApplicative<E>(@NonNull BinaryOperator<E> combineErrors)
      * @param values finite sequence of non-null Validation containers
      * @return Valid of immutable ordered values, or Invalid of all accumulated errors
      */
-    public <A> Validation<E, List<A>> sequence(
+    public <A extends @Nullable Object> Validation<E, List<A>> sequence(
             @NonNull Iterable<? extends Validation<E, ? extends A>> values) {
         return traverse(values, Function.identity());
     }
@@ -127,7 +128,7 @@ public record ValidationApplicative<E>(@NonNull BinaryOperator<E> combineErrors)
      * @param mapper independent validation for each input element
      * @return Valid of immutable ordered mapped values, or Invalid of all errors
      */
-    public <A, B> Validation<E, List<B>> traverse(
+    public <A extends @Nullable Object, B extends @Nullable Object> Validation<E, List<B>> traverse(
             @NonNull Iterable<? extends A> values,
             @NonNull Function<? super A, ? extends Validation<E, ? extends B>> mapper) {
         Validation<E, ArrayList<B>> accumulated = pure(new ArrayList<>());

@@ -40,6 +40,7 @@ def generate(n):
     args = list(LETTERS[:n])
     names = [a.lower() for a in args]
     types = ", ".join([*args, "R"])
+    bounds = ", ".join(f"{t} extends @Nullable Object" for t in [*args, "R"])
     params = ", ".join(f"{a} {name}" for a, name in zip(args, names))
     call = ", ".join(names)
     type_docs = [(arg, f"argument {i + 1} type") for i, arg in enumerate(args)]
@@ -50,7 +51,8 @@ def generate(n):
         "import java.util.Objects;",
         "import java.util.function.BiFunction;",
         "import java.util.function.Function;", "",
-        "import lombok.NonNull;", "",
+        "import lombok.NonNull;",
+        "import org.jspecify.annotations.Nullable;", "",
         "/**",
         f" * A function of {n} arguments, compatible with JDK unary and binary functions.",
         " *",
@@ -62,7 +64,7 @@ def generate(n):
         " * @param <R> result type",
         " */",
         "@FunctionalInterface",
-        f"public interface F{n}<{types}> {{", "",
+        f"public interface F{n}<{bounds}> {{", "",
     ]
     lines += javadoc(
         "Evaluate the function using all arguments.",
@@ -75,7 +77,7 @@ def generate(n):
         params=[("mapper", "result transformation, required at composition time")],
         returns="a lazily mapped function",
     ) + [
-        f"    default <S> {fn(args, 'S')} map(@NonNull Function<? super R, ? extends S> mapper) {{",
+        f"    default <S extends @Nullable Object> {fn(args, 'S')} map(@NonNull Function<? super R, ? extends S> mapper) {{",
         f"        return ({call}) -> mapper.apply(apply({call}));",
         "    }", "",
     ]
@@ -85,7 +87,7 @@ def generate(n):
         params=[("binder", "maps a result to another function with the same inputs")],
         returns="a lazily composed function",
     ) + [
-        f"    default <S> {fn(args, 'S')} flatMap(",
+        f"    default <S extends @Nullable Object> {fn(args, 'S')} flatMap(",
         f"            @NonNull Function<? super R, ? extends {fn(args, 'S')}> binder) {{",
         f'        return ({call}) -> Objects.requireNonNull(binder.apply(apply({call})),',
         f'                "flatMap returned a null function").apply({call});',
@@ -112,7 +114,7 @@ def generate(n):
             params=[("before", f"transformation to the original argument {i + 1} type")],
             returns="a function accepting the transformed argument",
         ) + [
-            f"    default <Z> {fn(target)} compose{i+1}(",
+            f"    default <Z extends @Nullable Object> {fn(target)} compose{i+1}(",
             f"            @NonNull Function<? super Z, ? extends {a}> before) {{",
             f"        return ({call}) -> apply({', '.join(transformed)});",
             "    }", "",
@@ -131,7 +133,7 @@ def generate(n):
         params=[("function", "a curried function accepting all arguments")],
         returns="an uncurried multi-argument function",
     ) + [
-        f"    static <{types}> {fn(args)} uncurry(@NonNull {curry(args)} function) {{",
+        f"    static <{bounds}> {fn(args)} uncurry(@NonNull {curry(args)} function) {{",
         f"        return ({call}) -> function{''.join(f'.apply({v})' for v in names)};",
         "    }",
         "}", "",

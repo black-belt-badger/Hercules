@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A function of 5 arguments, compatible with JDK unary and binary functions.
@@ -22,7 +23,7 @@ import lombok.NonNull;
  * @param <R> result type
  */
 @FunctionalInterface
-public interface F5<A, B, C, D, E, R> {
+public interface F5<A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, E extends @Nullable Object, R extends @Nullable Object> {
 
     /**
      * Evaluate the function using all arguments.
@@ -43,7 +44,7 @@ public interface F5<A, B, C, D, E, R> {
      * @param mapper result transformation, required at composition time
      * @return a lazily mapped function
      */
-    default <S> F5<A, B, C, D, E, S> map(@NonNull Function<? super R, ? extends S> mapper) {
+    default <S extends @Nullable Object> F5<A, B, C, D, E, S> map(@NonNull Function<? super R, ? extends S> mapper) {
         return (a, b, c, d, e) -> mapper.apply(apply(a, b, c, d, e));
     }
 
@@ -54,7 +55,7 @@ public interface F5<A, B, C, D, E, R> {
      * @param binder maps a result to another function with the same inputs
      * @return a lazily composed function
      */
-    default <S> F5<A, B, C, D, E, S> flatMap(
+    default <S extends @Nullable Object> F5<A, B, C, D, E, S> flatMap(
             @NonNull Function<? super R, ? extends F5<A, B, C, D, E, S>> binder) {
         return (a, b, c, d, e) -> Objects.requireNonNull(binder.apply(apply(a, b, c, d, e)),
                 "flatMap returned a null function").apply(a, b, c, d, e);
@@ -113,7 +114,7 @@ public interface F5<A, B, C, D, E, R> {
      * @param before transformation to the original argument 1 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F5<Z, B, C, D, E, R> compose1(
+    default <Z extends @Nullable Object> F5<Z, B, C, D, E, R> compose1(
             @NonNull Function<? super Z, ? extends A> before) {
         return (a, b, c, d, e) -> apply(before.apply(a), b, c, d, e);
     }
@@ -125,7 +126,7 @@ public interface F5<A, B, C, D, E, R> {
      * @param before transformation to the original argument 2 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F5<A, Z, C, D, E, R> compose2(
+    default <Z extends @Nullable Object> F5<A, Z, C, D, E, R> compose2(
             @NonNull Function<? super Z, ? extends B> before) {
         return (a, b, c, d, e) -> apply(a, before.apply(b), c, d, e);
     }
@@ -137,7 +138,7 @@ public interface F5<A, B, C, D, E, R> {
      * @param before transformation to the original argument 3 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F5<A, B, Z, D, E, R> compose3(
+    default <Z extends @Nullable Object> F5<A, B, Z, D, E, R> compose3(
             @NonNull Function<? super Z, ? extends C> before) {
         return (a, b, c, d, e) -> apply(a, b, before.apply(c), d, e);
     }
@@ -149,7 +150,7 @@ public interface F5<A, B, C, D, E, R> {
      * @param before transformation to the original argument 4 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F5<A, B, C, Z, E, R> compose4(
+    default <Z extends @Nullable Object> F5<A, B, C, Z, E, R> compose4(
             @NonNull Function<? super Z, ? extends D> before) {
         return (a, b, c, d, e) -> apply(a, b, c, before.apply(d), e);
     }
@@ -161,7 +162,7 @@ public interface F5<A, B, C, D, E, R> {
      * @param before transformation to the original argument 5 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F5<A, B, C, D, Z, R> compose5(
+    default <Z extends @Nullable Object> F5<A, B, C, D, Z, R> compose5(
             @NonNull Function<? super Z, ? extends E> before) {
         return (a, b, c, d, e) -> apply(a, b, c, d, before.apply(e));
     }
@@ -187,7 +188,7 @@ public interface F5<A, B, C, D, E, R> {
      * @param function a curried function accepting all arguments
      * @return an uncurried multi-argument function
      */
-    static <A, B, C, D, E, R> F5<A, B, C, D, E, R> uncurry(@NonNull Function<A, Function<B, Function<C, Function<D, Function<E, R>>>>> function) {
+    static <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, E extends @Nullable Object, R extends @Nullable Object> F5<A, B, C, D, E, R> uncurry(@NonNull Function<A, Function<B, Function<C, Function<D, Function<E, R>>>>> function) {
         return (a, b, c, d, e) -> function.apply(a).apply(b).apply(c).apply(d).apply(e);
     }
 }

@@ -50,7 +50,7 @@ The project is a **library JAR**, not an executable application. Its production 
 ./mvnw -B -ntp verify
 ```
 
-JSpecify `@NullMarked` is enabled for the initial package. Lombok `@NonNull` emits fail-fast runtime checks for required callbacks, combiners and container arguments; explicitly nullable generic payloads remain supported, and null structural callback results are checked when evaluated. See the [nullness policy](docs/nullness.md). JSpecify documents static contracts but requires an analyzer for static enforcement (#41). Lombok is configured during the library build; downstream consumers do not need its annotation processor.
+JSpecify `@NullMarked` is enabled for the initial package. **NullAway checks the JSpecify contracts during Maven compilation and CI** (#41), while Lombok `@NonNull` emits separate fail-fast runtime checks for required callbacks, combiners and container arguments. Explicitly nullable generic payloads remain supported; structural callback results are checked when evaluated. See the [nullness policy](docs/nullness.md). Run `./scripts/verify-nullness.sh` to compile positive and intentionally invalid consumer fixtures. Lombok is configured during the library build; downstream consumers do not need its annotation processor.
 
 ## Status
 

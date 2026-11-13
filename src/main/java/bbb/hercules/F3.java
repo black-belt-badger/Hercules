@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A function of 3 arguments, compatible with JDK unary and binary functions.
@@ -20,7 +21,7 @@ import lombok.NonNull;
  * @param <R> result type
  */
 @FunctionalInterface
-public interface F3<A, B, C, R> {
+public interface F3<A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, R extends @Nullable Object> {
 
     /**
      * Evaluate the function using all arguments.
@@ -39,7 +40,7 @@ public interface F3<A, B, C, R> {
      * @param mapper result transformation, required at composition time
      * @return a lazily mapped function
      */
-    default <S> F3<A, B, C, S> map(@NonNull Function<? super R, ? extends S> mapper) {
+    default <S extends @Nullable Object> F3<A, B, C, S> map(@NonNull Function<? super R, ? extends S> mapper) {
         return (a, b, c) -> mapper.apply(apply(a, b, c));
     }
 
@@ -50,7 +51,7 @@ public interface F3<A, B, C, R> {
      * @param binder maps a result to another function with the same inputs
      * @return a lazily composed function
      */
-    default <S> F3<A, B, C, S> flatMap(
+    default <S extends @Nullable Object> F3<A, B, C, S> flatMap(
             @NonNull Function<? super R, ? extends F3<A, B, C, S>> binder) {
         return (a, b, c) -> Objects.requireNonNull(binder.apply(apply(a, b, c)),
                 "flatMap returned a null function").apply(a, b, c);
@@ -84,7 +85,7 @@ public interface F3<A, B, C, R> {
      * @param before transformation to the original argument 1 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F3<Z, B, C, R> compose1(
+    default <Z extends @Nullable Object> F3<Z, B, C, R> compose1(
             @NonNull Function<? super Z, ? extends A> before) {
         return (a, b, c) -> apply(before.apply(a), b, c);
     }
@@ -96,7 +97,7 @@ public interface F3<A, B, C, R> {
      * @param before transformation to the original argument 2 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F3<A, Z, C, R> compose2(
+    default <Z extends @Nullable Object> F3<A, Z, C, R> compose2(
             @NonNull Function<? super Z, ? extends B> before) {
         return (a, b, c) -> apply(a, before.apply(b), c);
     }
@@ -108,7 +109,7 @@ public interface F3<A, B, C, R> {
      * @param before transformation to the original argument 3 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F3<A, B, Z, R> compose3(
+    default <Z extends @Nullable Object> F3<A, B, Z, R> compose3(
             @NonNull Function<? super Z, ? extends C> before) {
         return (a, b, c) -> apply(a, b, before.apply(c));
     }
@@ -132,7 +133,7 @@ public interface F3<A, B, C, R> {
      * @param function a curried function accepting all arguments
      * @return an uncurried multi-argument function
      */
-    static <A, B, C, R> F3<A, B, C, R> uncurry(@NonNull Function<A, Function<B, Function<C, R>>> function) {
+    static <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, R extends @Nullable Object> F3<A, B, C, R> uncurry(@NonNull Function<A, Function<B, Function<C, R>>> function) {
         return (a, b, c) -> function.apply(a).apply(b).apply(c);
     }
 }
