@@ -30,8 +30,28 @@ Java 17 is the language compatibility baseline even if contributors run the buil
 - Cover failure and boundary cases, null contracts, immutability, allocation and stack safety where relevant.
 - Follow the [nullness policy](docs/nullness.md): JSpecify `@NullMarked` per package, explicit `@Nullable` type uses for intentionally nullable generic payloads, and Lombok `@NonNull` for required structural references (callbacks, combiners, suppliers, and container inputs). Do not put blanket runtime null checks on payload records or generic factories.
 - Preserve explicit runtime validation of null **structural callback results**, without triggering deferred functions prematurely. The Maven build now enforces JSpecify contracts via NullAway (#41); run `./scripts/verify-nullness.sh` to prove that intentional nullable payloads compile and illegal null uses fail. Keep generic payload type parameters bounded by `@Nullable Object` so explicit nullable specializations remain valid.
-- For `F3`–`F10` update `scripts/generate_functions.py` and regenerate the source files; never hand-edit generated Java.
+- For `F3`–`F10`, `HigherArityFunctionsTest` and `ValidationApplicative.map3`–`map10`, change the generators, never their checked-in output by hand. Regenerate and verify using the commands below.
 - Do not introduce a general FP hierarchy or require clients to wrap their applications in Hercules types to use one abstraction.
+
+## Generated Java sources and tests
+
+Update generators first, then regenerate the checked-in outputs from the repository root:
+
+```sh
+python3 scripts/generate_functions.py
+python3 scripts/generate_function_tests.py
+python3 scripts/generate_validation_mapn.py
+python3 scripts/verify_generated.py --self-test
+```
+
+The generators own `F3.java` through `F10.java`, the complete
+`HigherArityFunctionsTest.java`, and **only the marked generated region**
+inside `ValidationApplicative.java`, respectively. The verification command
+recreates all 10 generated outputs in a disposable directory and compares
+bytes against the checkout, then proves deliberate source/test/generator
+changes are detected. It never edits checked-in files. GitHub Actions runs
+this check on Java 17, 21 and 25 jobs. Python 3 is the only prerequisite
+beyond the normal Java/Maven toolchain.
 
 ## Pull requests
 
