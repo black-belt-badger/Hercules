@@ -18,7 +18,7 @@
 - **Higher-arity functions**: `F3`–`F10` with `apply`, `partial`, `map`, Reader-style `flatMap`, `compose1`–`composeN`, `curried`, and `uncurry`. See the [usage guide](docs/functions.md). All arities interoperate with JDK `Function` and `BiFunction` after partial application.
 - **Either**: right-biased `Either<L,R>` with sealed `Left` and `Right` records, `map`, `mapLeft`, `flatMap`, `bimap`, `fold`, `swap`, recovery, optional conversion and lossless widening to `These`. See the [Either guide](docs/either.md).
 - **These**: inclusive-or `These<L,R>` with `This`, `That` and `Both`, preserving both data and diagnostics. Includes right-biased `flatMap` with an explicit associative left combiner. See the [These guide](docs/these.md).
-- **Those**: four-way `Those<A,B,E>` with `This`, `That`, `Both`, and typed `Neither(E)` for informative absence. Maps all payloads and converts losslessly to `Either<E, These<A,B>>`. See the [Those guide](docs/those.md).
+- **Those**: four-way `Those<L,R,E>` with `This`, `That`, `Both`, and typed `Neither(E)` for informative absence. Maps all payloads and converts losslessly to `Either<E, These<A,B>>`. See the [Those guide](docs/those.md).
 - **Explicit choice**: `EitherChoice<L>` supports leftmost-success fallback and ordered accumulation of failed alternatives using a caller-provided identity and combiner. This is a concrete choice monoid, not a universal higher-kinded `Alternative`. See the [choice guide](docs/choice.md).
 
 ## Areas under consideration

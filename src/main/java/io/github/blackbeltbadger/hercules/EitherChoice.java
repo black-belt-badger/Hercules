@@ -24,11 +24,22 @@ import java.util.function.Supplier;
  */
 public record EitherChoice<L>(L emptyLeft, BinaryOperator<L> combineLeft) {
 
+    /**
+     * Construct a choice policy, rejecting a null combination function.
+     *
+     * @param emptyLeft identity for combining failed alternatives
+     * @param combineLeft associative operation for two failed alternatives
+     */
     public EitherChoice {
         Objects.requireNonNull(combineLeft, "combineLeft");
     }
 
-    /** Return the identity for choice. */
+    /**
+     * Return the identity for choice.
+     *
+     * @param <R> right payload type
+     * @return the left-only identity of this choice policy
+     */
     public <R> Either<L, R> empty() {
         return Either.left(emptyLeft);
     }
@@ -37,6 +48,11 @@ public record EitherChoice<L>(L emptyLeft, BinaryOperator<L> combineLeft) {
      * Choose the first right value, or the second right value if the first is
      * left. When both are left, combine the left payloads in encounter order.
      * Both arguments are already evaluated by the caller.
+     *
+     * @param <R> right payload type
+     * @param first first alternative, whose right value takes precedence
+     * @param second second alternative or lazy fallback
+     * @return the first successful alternative, or combined left values
      */
     public <R> Either<L, R> choose(Either<L, R> first, Either<L, R> second) {
         Objects.requireNonNull(second, "second");
@@ -47,6 +63,11 @@ public record EitherChoice<L>(L emptyLeft, BinaryOperator<L> combineLeft) {
      * As {@link #choose(Either, Either)} with a lazy second alternative.
      * The supplier is validated eagerly but invoked only if the first is
      * left. A null result from the supplier is rejected when evaluated.
+     *
+     * @param <R> right payload type
+     * @param first first alternative, whose right value takes precedence
+     * @param second second alternative or lazy fallback
+     * @return the first successful alternative, or combined left values
      */
     public <R> Either<L, R> choose(
             Either<L, R> first, Supplier<? extends Either<L, R>> second) {
