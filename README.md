@@ -11,12 +11,17 @@
 - **Minimal implementation dependencies.** Guava immutable collections, Lombok and JSpecify are our approved foundations. Do not require clients to use Guava types or install Lombok simply to consume the library. JSpecify annotations describe nullness contracts without requiring callers to adopt a framework.
 - **Prefer algebraic laws to ceremony.** Add examples, tests and clear semantics. Do not manufacture a full typeclass hierarchy or duplicate JDK reduction APIs without a practical reason.
 - **Functional, not dogmatic.** Explicit state, immutable data and composition are goals; existing Java programs remain first-class citizens.
+- **Pure core, interpreted effects.** Describe logging and other effects as data; perform I/O only at explicit interpretation boundaries.
 
 ## Areas under consideration
 
 Higher-arity functions (`F3`–`F10`); `Reader`, `Writer`, and `State`; trampolines; `Either`, `These`/`Ior`, and typed `Those`; `Alternative`, Applicative, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types.
 
 All are **proposals** until implemented and validated. Inclusion in this list does not imply a committed public API.
+
+## Public backlog
+
+Track proposed abstractions, experiments and implementation work on the [Hercules Project Board](https://github.com/orgs/black-belt-badger/projects/11/views/2) and in [public issues](https://github.com/black-belt-badger/Hercules/issues). The library remains opt-in: adopting one abstraction must not require adopting the rest.
 
 ## Java and Maven
 
