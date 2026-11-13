@@ -6,8 +6,8 @@ dependency information **explicit**, rather than hiding it in
 thread-local state, a global singleton or a framework container.
 
 `Reader` is one focused increment of [#3](https://github.com/black-belt-badger/hercules/issues/3).
-`Writer` is already available, and `State` remains a separate
-increment. Readers are Java functions; they do not require an
+`Writer` and `State` are also available as independent
+abstractions. Readers are Java functions; they do not require an
 application to adopt a functional-programming runtime.
 
 ## Public API
