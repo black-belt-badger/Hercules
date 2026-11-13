@@ -21,6 +21,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>No generic {@code flatMap} or {@code combine} is provided: combining
  * a Neither with partial evidence can otherwise discard an explanation.
+ * For explicit policies see {@link ThoseAggregation}; for payload-free
+ * information order see {@link ThoseShape}.
  *
  * @param <L> left evidence type
  * @param <R> right evidence type

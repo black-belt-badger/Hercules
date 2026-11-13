@@ -101,26 +101,137 @@ meanings. Both widening steps preserve values and variants without
 inventing missing data, and their mapping/swapping coherence laws are
 checked with Instancio.
 
-## Why there is deliberately no combine or flatMap
+## Shape only: a four-element information lattice
 
-Consider `Neither("A timed out")` and `That(dataFromB)`.
+`ThoseShape` deliberately forgets all payloads and tracks only which
+evidence kinds are present. It has four values:
 
-One valid policy says the explanation was only about *total absence*;
-it may become obsolete when B supplies evidence. Another says the timeout
-is *provenance* and should survive alongside B's observation.
+```text
+               BOTH
+             /      \
+           LEFT     RIGHT
+             \      /
+              NEITHER
+```
 
-The four constructors cannot represent both arbitrary `E` and `B`
-simultaneously. Providing a generic `combine` or `flatMap` would
-therefore require a **domain-specific information-loss policy**,
-additional payload structure, or a different type. It would be
-incorrect to assume `Neither(E)` is an identity for aggregation.
+`join` is set-union of present evidence kinds; `meet` is their
+intersection. Both are associative, commutative and idempotent;
+absorption holds. `NEITHER` is the identity for **shape join only**,
+not an identity for combining `Those.Neither(e)` payloads.
 
-We intentionally add **no** `Alternative`, `empty`, `flatMap`,
-`combine`, `zip`, or `toOptional` method in this subtask.
-Aggregation and optional/lossy conversions remain subjects for
-issues #5, #9 and #27. For applications needing E information alongside
-evidence, consider a richer record or `These<E, These<L,R>>`,
-rather than discarding E.
+```java
+ThoseShape shape = ThoseShape.of(Those.<String, Long, String>neither(
+        "provider A timed out"));
+assert shape == ThoseShape.NEITHER;
+assert shape.join(ThoseShape.RIGHT) == ThoseShape.RIGHT;
+```
+
+Shape projection cannot distinguish `Neither("A timed out")` from
+`Neither("B disconnected")`: both become `ThoseShape.NEITHER`.
+This is intentional, explicit information loss, suitable for
+presence-only queries or planning. It is not a payload-bearing Belnap
+algebra; the analogy is limited to the information order.
+
+## Aggregating all three payload channels without discarding provenance
+
+`ThoseAggregation<L,R,E>` is an **explicit, associative** semigroup
+policy requiring a `BinaryOperator<L>`, a `BinaryOperator<R>`, and a
+`BinaryOperator<E>`. The result does **not** attempt to squeeze
+provenance back into the four variants. It uses a seven-state type:
+
+```text
+These<E, These<L,R>>
+
+E only                  These.This(e)
+L only                  These.That(These.This(l))
+R only                  These.That(These.That(r))
+L and R                 These.That(These.Both(l,r))
+E and L                 These.Both(e,These.This(l))
+E and R                 These.Both(e,These.That(r))
+E and L and R           These.Both(e,These.Both(l,r))
+```
+
+For example, independently downloaded sources may both produce evidence
+and fail to respond:
+
+```java
+ThoseAggregation<List<String>, List<String>, List<String>> aggregation =
+        new ThoseAggregation<>(
+                (a, b) -> Stream.concat(a.stream(), b.stream()).toList(),
+                (a, b) -> Stream.concat(a.stream(), b.stream()).toList(),
+                (a, b) -> Stream.concat(a.stream(), b.stream()).toList());
+
+Those<List<String>, List<String>, List<String>> sourceA =
+        Those.neither(List.of("source A timed out"));
+Those<List<String>, List<String>, List<String>> sourceB =
+        Those.right(List.of("BTC price from source B"));
+
+These<List<String>, These<List<String>, List<String>>> result =
+        aggregation.combine(sourceA, sourceB);
+
+// These.Both(["source A timed out"],
+//            These.That(["BTC price from source B"]))
+```
+
+This preserves the timeout explanation alongside the successful
+observation. With **associative, non-mutating** payload combiners, the
+aggregation is associative because each presence channel is combined
+independently in encounter order. It need not be commutative:
+concatenating source observations may yield different order under
+reversal. The result has **no generic identity**; `combineAll` therefore
+requires a *nonempty, finite* iterable. Single-element `combineAll`
+is equivalent to `lift`. No work is scheduled; all inputs are visited
+once, and iterator/combiner exceptions propagate.
+
+Methods:
+
+- `lift(Those)`: exact embedding of one original value into the richer
+  representation
+- `combine(Those,Those)`: two originals, producing the richer result
+- `combine(These,These)`: **closed** aggregation of intermediate
+  seven-state results
+- `combineAll(Iterable<Those>)`: ordered aggregation of nonempty
+  finite input, rejecting an empty iterable with `NoSuchElementException`
+
+The supplied binary operators determine how individual payload details
+are combined. If retaining every explanation matters, choose an
+information-preserving `E` policy such as immutable-list concatenation.
+A lossy `combineExplanation` (for example, "keep latest") does not
+magically become lossless just because the representation has an E
+channel. Payload values may be explicitly nullable, subject to their
+type-use contracts.
+
+## What we deliberately do not add to Those
+
+Consider `Neither("A timed out")` and `That(dataFromB)`. A
+four-state `Those` result cannot carry both the explanation and data.
+This rules out a **universally provenance-preserving** closed
+`Those.combine`. There are domain-specific alternatives, but they
+must be explicit:
+
+| Candidate | Decision | Law or information-loss consequence |
+| --- | --- | --- |
+| Shape-only `join`/`meet` | **Implement**: `ThoseShape` | Bounded distributive lattice on presence bits, but all payloads and E are discarded |
+| Provenance-aware aggregation | **Implement**: `ThoseAggregation` | Associative when L/R/E operators are associative; combines in the richer seven-state result, retaining E separately |
+| "Discard E when evidence appears" merge | **Defer** | May be associative under a specified semigroup policy, but is intentionally *lossy*; must not be called universally lossless |
+| Treat every `Neither(e)` as an identity | **Drop** | Two arbitrary distinct explanations cannot both be neutral under an operation that also retains both reasons; `Neither(e1) + Neither(e2)` needs an explicit E policy |
+| Generic right-biased `flatMap` or `zip` on `Those` | **Drop for core** | When later evidence appears, an earlier E has nowhere to go; dependent fail-fast choices require a domain-specific interpretation |
+| `Alternative` / `empty` | **Drop for core** | There is no canonical E payload representing empty or a lawful universal choice among all four variants |
+| `toOptional` / partial projection | **Defer** | Cannot recover E or both evidence slots from `Optional<R>`; callers should explicitly `fold` if intentional information loss is acceptable |
+| `Either<E,These<L,R>>` | **Retain exact four-state conversion** | `toEither` / `fromEither` is lossless for the original four constructors, but cannot express E together with evidence |
+| A richer record instead of nested `These` | **Defer** | Possible if real users need a named domain representation; no extra abstraction needed for seven present cases |
+
+A counterexample to treating absence as an ordinary identity is the
+attempt to make *both* `Neither("timeout A")` and
+`Neither("timeout B")` empty: retaining both independent reasons
+requires a merger of E, while an arbitrary identity policy would erase
+one. Similarly, `Optional<These<L,R>>` maps distinct absence
+explanations to the same empty value. Neither conversion is reversible.
+
+The original `Those<L,R,E>` stays intentionally free of an
+unqualified `flatMap`, `combine`, `zip` or `Alternative` instance.
+The policy lives in named, independently adoptable types rather than
+implicitly assigning semantics to all callers.
 
 ## Validation
 
@@ -130,9 +241,18 @@ identity and composition for mapping, `bimap`/`trimap` coherence,
 swap involution, conversion in both directions, fold exhaustiveness,
 callback counts, nullness and exception propagation.
 
+`ThoseShapeLawsTest` checks lattice associativity, commutativity,
+idempotence, absorption and all four shape projections.
+`ThoseAggregationLawsTest` uses Instancio values to check associativity
+across all **seven rich cases** and all four original cases, encounter
+order, preservation of timeout provenance, nonempty aggregation, strict
+runtime contracts and explicitly nullable payloads. An independent-package
+`ThoseAggregationPublicApiTest` exercises a practical market-data example.
+
 ```bash
 ./mvnw -B -ntp verify
 ```
 
 Java 17 is the baseline. CI runs Java 17, 21, and 25.
-Parent: #5. Implementation: #26. Deferred aggregation: #27. Deferred `Either` conveniences: #23.
+Core implementation: #26. Aggregation and provenance research/implementation: #27.
+Deferred `Either` conveniences: #23. The former umbrella #5 is already closed.
