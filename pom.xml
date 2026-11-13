@@ -32,6 +32,7 @@
         <lombok.version>1.18.48</lombok.version>
         <jspecify.version>1.0.1</jspecify.version>
         <junit.version>5.14.4</junit.version>
+        <instancio.version>5.6.0</instancio.version>
     </properties>
 
     <dependencies>
@@ -55,6 +56,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.instancio</groupId>
+            <artifactId>instancio-junit</artifactId>
+            <version>${instancio.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

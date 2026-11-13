@@ -16,10 +16,11 @@
 ## Implemented
 
 - **Higher-arity functions**: `F3`–`F10` with `apply`, `partial`, `map`, Reader-style `flatMap`, `compose1`–`composeN`, `curried`, and `uncurry`. See the [usage guide](docs/functions.md). All arities interoperate with JDK `Function` and `BiFunction` after partial application.
+- **Either**: right-biased `Either<L,R>` with sealed `Left` and `Right` records, `map`, `mapLeft`, `flatMap`, `bimap`, `fold`, `swap`, recovery and explicit optional conversion. See the [Either guide](docs/either.md).
 
 ## Areas under consideration
 
-`Reader`, `Writer`, and `State`; trampolines; `Either`, `These`/`Ior`, and typed `Those`; `Alternative`, Applicative, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types.
+`Reader`, `Writer`, and `State`; trampolines; `These`/`Ior` and typed `Those`; `Alternative`, Applicative, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types.
 
 All remaining items are **proposals** until implemented and validated. Inclusion in this list does not imply a committed public API.
 
@@ -37,7 +38,7 @@ The Maven coordinates reserved for development are:
 io.github.blackbeltbadger:hercules:0.1.0-SNAPSHOT
 ```
 
-The project is a **library JAR**, not an executable application. Its production dependencies are Guava, JSpecify annotations, and compile-time-only Lombok. Tests use JUnit 5.
+The project is a **library JAR**, not an executable application. Its production dependencies are Guava, JSpecify annotations, and compile-time-only Lombok. Tests use JUnit 5 and **Instancio** (test scope only) for randomized, reproducible law tests.
 
 ```bash
 ./mvnw -B -ntp verify
@@ -47,7 +48,7 @@ JSpecify `@NullMarked` is enabled for the initial package. JSpecify annotations 
 
 ## Status
 
-First functional abstraction implemented (`F3`–`F10`). No published release yet.
+`F3`–`F10` and `Either` implemented. No published release yet.
 
 ## License
 
