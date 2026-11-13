@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
     <name>Hercules</name>
     <description>Incrementally adoptable functional programming abstractions for Java.</description>
-    <url>https://github.com/black-belt-badger/Hercules</url>
+    <url>https://github.com/black-belt-badger/hercules</url>
 
     <licenses>
         <license>
@@ -20,9 +20,9 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:https://github.com/black-belt-badger/Hercules.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/black-belt-badger/Hercules.git</developerConnection>
-        <url>https://github.com/black-belt-badger/Hercules</url>
+        <connection>scm:git:https://github.com/black-belt-badger/hercules.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/black-belt-badger/hercules.git</developerConnection>
+        <url>https://github.com/black-belt-badger/hercules</url>
     </scm>
 
     <properties>

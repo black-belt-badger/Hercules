@@ -30,7 +30,7 @@ All remaining items are **proposals** until implemented and validated. Inclusion
 
 ## Public backlog
 
-Track proposed abstractions, experiments and implementation work on the [Hercules Project Board](https://github.com/orgs/black-belt-badger/projects/11/views/2) and in [public issues](https://github.com/black-belt-badger/Hercules/issues). The library remains opt-in: adopting one abstraction must not require adopting the rest.
+Track proposed abstractions, experiments and implementation work on the [Hercules Project Board](https://github.com/orgs/black-belt-badger/projects/11/views/2) and in [public issues](https://github.com/black-belt-badger/hercules/issues). The library remains opt-in: adopting one abstraction must not require adopting the rest.
 
 ## Java and Maven
 
