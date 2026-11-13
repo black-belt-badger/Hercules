@@ -13,11 +13,15 @@
 - **Functional, not dogmatic.** Explicit state, immutable data and composition are goals; existing Java programs remain first-class citizens.
 - **Pure core, interpreted effects.** Describe logging and other effects as data; perform I/O only at explicit interpretation boundaries.
 
+## Implemented
+
+- **Higher-arity functions**: `F3`–`F10` with `apply`, `partial`, `map`, Reader-style `flatMap`, `compose1`–`composeN`, `curried`, and `uncurry`. See the [usage guide](docs/functions.md). All arities interoperate with JDK `Function` and `BiFunction` after partial application.
+
 ## Areas under consideration
 
-Higher-arity functions (`F3`–`F10`); `Reader`, `Writer`, and `State`; trampolines; `Either`, `These`/`Ior`, and typed `Those`; `Alternative`, Applicative, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types.
+`Reader`, `Writer`, and `State`; trampolines; `Either`, `These`/`Ior`, and typed `Those`; `Alternative`, Applicative, Monad and Comonad; functional lenses; persistent measured finger trees; Free Monads; type algebra, bounded and modular types.
 
-All are **proposals** until implemented and validated. Inclusion in this list does not imply a committed public API.
+All remaining items are **proposals** until implemented and validated. Inclusion in this list does not imply a committed public API.
 
 ## Public backlog
 
@@ -43,7 +47,7 @@ JSpecify `@NullMarked` is enabled for the initial package. JSpecify annotations 
 
 ## Status
 
-Scaffold initialized. No functional abstractions or published release yet.
+First functional abstraction implemented (`F3`–`F10`). No published release yet.
 
 ## License
 
