@@ -74,6 +74,71 @@ var both = present.bimap(String::length, n -> n * 10); // Right(70)
 - `toOptional()` **deliberately discards left information**. A `Right(null)`
   with an explicitly nullable payload also becomes an empty optional.
 
+## Filtering and why rejection needs a left value
+
+`filterOrElse(predicate, onFailure)` is the one convenience adopted
+from the #23 review. It keeps the original `Left(L)` unchanged by
+value and does not invoke either callback on that branch. On
+`Right(R)`, the predicate runs **once**: a pass keeps the right
+payload; a failure evaluates `onFailure(R)` **once**, constructing
+`Left(L)`.
+
+```java
+Either<String, Integer> quantity = Either.right(-2);
+
+Either<String, Integer> checked = quantity.filterOrElse(
+        n -> n > 0,
+        n -> "quantity must be positive: " + n);
+// Left("quantity must be positive: -2")
+
+// An existing Left stays unchanged without evaluating either callback:
+Either<String, Integer> missing = Either.left("not supplied");
+Either<String, Integer> same = missing.filterOrElse(
+        n -> n > 0, n -> "not positive");
+// Left("not supplied")
+```
+
+The rejected value becomes a **caller-provided** left payload, never an
+invented empty or exception. Both callback references are checked
+eagerly (including for an existing `Left`), even though neither is
+executed on that branch. A passing `Right` never evaluates
+`onFailure`. Callback exceptions propagate unchanged; there is no
+implicit exception-to-`Left` conversion. For an explicitly nullable
+`Right`, predicates may receive null; an explicitly nullable `Left`
+can also be returned by the rejection function.
+
+The method is defined in terms of `fold` and preserves existing
+Functor/Monad semantics: it does **not** introduce an alternative
+interpretation of `Left`.
+
+## #23 convenience-method decisions
+
+Hercules deliberately implements a small API rather than mirroring
+every method of a full functional framework. The following decisions
+were reviewed against [Vavr's Either API](https://www.javadoc.io/static/io.vavr/vavr/0.11.0/io/vavr/control/Either.html),
+Java's standard `Optional` and this library's explicit `fold`.
+
+| Candidate | Decision | Reason |
+| --- | --- | --- |
+| `filterOrElse(Predicate<R>, Function<R,L>)` | **Implement** | Useful right-validation pipeline; the caller defines the meaningful Left on rejection, preserving the existing Left and its payload |
+| `filter(Predicate<R>)` | **Drop** | It cannot produce `Either<L,R>` when a Right is rejected without making up an L. Vavr uses `Option<Either<L,R>>`, which cannot explain why rejection occurred; this differs from our typed-error objective |
+| `get()` | **Drop** | Partial extraction of R would throw on Left; no justified generic exception policy. Use `fold`, `getOrElse`, `recover`, or a checked variant pattern |
+| `getLeft()` | **Drop** | Symmetric partial extraction with the same problem for Right. Use `fold` or an explicit `Either.Left` pattern |
+| `peek(Consumer<R>)` | **Defer** | Useful for metrics/logging but introduces observable side effects into a fluent chain. Use explicit observation at an effect boundary and avoid implying that a pure mapping is effectful |
+| `peekLeft(Consumer<L>)` | **Defer** | Same tradeoff; neither a Left nor a Right is necessarily an exception or logging event |
+
+Unlike Vavr, Hercules does not need a `Value` or collection-style
+interface to express filtering. The presence of these names in another
+library is not itself justification for adding them here. Any future
+`peek` addition must clearly specify strict callback validation,
+active-branch execution and unchanged return value, plus propagate
+user exceptions without reinterpretation.
+
+No new runtime dependencies, higher-kinded interfaces or generic
+exception protocols are introduced. These are #23's
+**implement/defer/drop** decisions. The older outcome umbrella #5
+is already closed.
+
 ## Nullability, value semantics and safety
 
 `@NullMarked` applies to the package. Use `@Nullable` for intentional
@@ -107,6 +172,13 @@ A failing run prints a reproducible seed. It verifies:
 - `swap().swap()` involution and branch preservation
 - Callback order and evaluation count; exceptions and null handling
 - Explicit information loss in `toOptional`
+
+`EitherFilterLawsTest` adds Instancio-backed branch-exhaustive checks
+for `filterOrElse`: predicate/failure callback counts, preservation
+of existing Left or passing Right, typed rejection reasons, eager
+null-reference checks, callback exceptions and explicitly nullable
+payloads. `EitherFilterPublicApiTest` checks the same API from a
+separate consumer package.
 
 We use Instancio **5.x** because Hercules currently uses JUnit 5.
 Instancio is test-scope only; it is not a runtime Hercules dependency.

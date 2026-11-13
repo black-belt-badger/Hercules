@@ -3,6 +3,7 @@ package bbb.hercules;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import lombok.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -114,6 +115,33 @@ public sealed interface Either<L extends @Nullable Object, R extends @Nullable O
         return fold(
                 left -> Either.<L, T>left(left),
                 right -> Objects.requireNonNull(binder.apply(right), "flatMap returned null"));
+    }
+
+    /**
+     * Keep a right value if it passes a predicate, or produce a meaningful left value.
+     *
+     * <p>An existing Left is preserved without evaluating either callback.
+     * On Right, the predicate runs exactly once. If it passes, the Right
+     * payload is retained without evaluating {@code onFailure}; if it fails,
+     * {@code onFailure} runs once with the original right payload and its
+     * result becomes Left. A left value need not represent an exception.
+     *
+     * <p>Both callback references are checked for null eagerly, including on
+     * the inactive branch. User callback exceptions propagate unchanged.
+     * Explicitly nullable generic payload types remain supported.
+     *
+     * @param predicate condition that a right value must satisfy
+     * @param onFailure explanation for a right value failing the predicate
+     * @return the original choice by value if left or passing, otherwise a new Left
+     */
+    default Either<L, R> filterOrElse(
+            @NonNull Predicate<? super R> predicate,
+            @NonNull Function<? super R, ? extends L> onFailure) {
+        return fold(
+                Either::left,
+                right -> predicate.test(right)
+                        ? Either.right(right)
+                        : Either.left(onFailure.apply(right)));
     }
 
     /**
