@@ -7,7 +7,7 @@ statistics or other structured output **as data**. It never logs, prints,
 sends messages or performs I/O on its own.
 
 Writer is one focused part of [#3](https://github.com/black-belt-badger/hercules/issues/3);
-Reader and State will be reviewed and implemented independently.
+Reader and State are implemented as separate abstractions.
 
 ## Types and API
 
