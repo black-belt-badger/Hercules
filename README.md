@@ -20,7 +20,7 @@
 - **These**: inclusive-or `These<L,R>` with `This`, `That` and `Both`, preserving both data and diagnostics. Includes right-biased `flatMap` with an explicit associative left combiner. See the [These guide](docs/these.md).
 - **Those**: four-way `Those<L,R,E>` with `This`, `That`, `Both`, and typed `Neither(E)` for informative absence. Maps all payloads and converts losslessly to `Either<E, These<A,B>>`. See the [Those guide](docs/those.md).
 - **Explicit choice**: `EitherChoice<L>` supports leftmost-success fallback and ordered accumulation of failed alternatives using a caller-provided identity and combiner. This is a concrete choice monoid, not a universal higher-kinded `Alternative`. See the [choice guide](docs/choice.md).
-- **Accumulating validation**: `Validation<E,A>` with `Valid`/`Invalid` and `ValidationApplicative<E>` for independent checks, lawful `pure`/`ap`/`map2`, ordered `sequence`/`traverse` for many checks, and arity-aware `map3`–`map10` using `F3`–`F10`. All failures accumulate. See the [Validation guide](docs/validation.md).
+- **Accumulating validation**: `Validation<E,A>` with `Valid`/`Invalid` and `ValidationApplicative<E>` for independent checks, lawful `pure`/`ap`/`map2`, ordered `sequence`/`traverse` for many checks, arity-aware `map3`–`map10` using `F3`–`F10`, and `CompletionStage` composition (`map2Stages`/`sequenceStages`) for independently supplied asynchronous checks. Normal validation failures accumulate; exceptional completion remains exceptional. See the [Validation guide](docs/validation.md).
 
 ## Areas under consideration
 
