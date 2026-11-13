@@ -1,7 +1,8 @@
 package io.github.blackbeltbadger.hercules;
 
-import java.util.Objects;
 import java.util.function.Function;
+
+import lombok.NonNull;
 
 /**
  * A successful value or accumulated validation errors.
@@ -29,8 +30,8 @@ public sealed interface Validation<E, A>
      * @param onValid handler for a valid value
      * @return the result from the active case
      */
-    <R> R fold(Function<? super E, ? extends R> onInvalid,
-               Function<? super A, ? extends R> onValid);
+    <R> R fold(@NonNull Function<? super E, ? extends R> onInvalid,
+               @NonNull Function<? super A, ? extends R> onValid);
 
     /**
      * Construct an invalid result.
@@ -63,8 +64,7 @@ public sealed interface Validation<E, A>
      * @param mapper transformation applied only when valid
      * @return a mapped validation with the same case
      */
-    default <B> Validation<E, B> map(Function<? super A, ? extends B> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <B> Validation<E, B> map(@NonNull Function<? super A, ? extends B> mapper) {
         return fold(Validation::invalid, value -> Validation.valid(mapper.apply(value)));
     }
 
@@ -75,8 +75,7 @@ public sealed interface Validation<E, A>
      * @param mapper transformation applied only when invalid
      * @return a validation with transformed errors where present
      */
-    default <F> Validation<F, A> mapLeft(Function<? super E, ? extends F> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <F> Validation<F, A> mapLeft(@NonNull Function<? super E, ? extends F> mapper) {
         return fold(errors -> Validation.invalid(mapper.apply(errors)), Validation::valid);
     }
 
@@ -90,10 +89,8 @@ public sealed interface Validation<E, A>
      * @return a validation with the active payload transformed
      */
     default <F, B> Validation<F, B> bimap(
-            Function<? super E, ? extends F> errorMapper,
-            Function<? super A, ? extends B> valueMapper) {
-        Objects.requireNonNull(errorMapper, "errorMapper");
-        Objects.requireNonNull(valueMapper, "valueMapper");
+            @NonNull Function<? super E, ? extends F> errorMapper,
+            @NonNull Function<? super A, ? extends B> valueMapper) {
         return fold(errors -> Validation.invalid(errorMapper.apply(errors)),
                     value -> Validation.valid(valueMapper.apply(value)));
     }
@@ -117,8 +114,7 @@ public sealed interface Validation<E, A>
      * @param source an Either to convert, not null
      * @return an equivalent invalid or valid value
      */
-    static <E, A> Validation<E, A> fromEither(Either<E, A> source) {
-        Objects.requireNonNull(source, "source");
+    static <E, A> Validation<E, A> fromEither(@NonNull Either<E, A> source) {
         return source.fold(Validation::invalid, Validation::valid);
     }
 
@@ -126,10 +122,8 @@ public sealed interface Validation<E, A>
     record Invalid<E, A>(E errors) implements Validation<E, A> {
 
         @Override
-        public <R> R fold(Function<? super E, ? extends R> onInvalid,
-                          Function<? super A, ? extends R> onValid) {
-            Objects.requireNonNull(onInvalid, "onInvalid");
-            Objects.requireNonNull(onValid, "onValid");
+        public <R> R fold(@NonNull Function<? super E, ? extends R> onInvalid,
+                          @NonNull Function<? super A, ? extends R> onValid) {
             return onInvalid.apply(errors);
         }
     }
@@ -138,10 +132,8 @@ public sealed interface Validation<E, A>
     record Valid<E, A>(A value) implements Validation<E, A> {
 
         @Override
-        public <R> R fold(Function<? super E, ? extends R> onInvalid,
-                          Function<? super A, ? extends R> onValid) {
-            Objects.requireNonNull(onInvalid, "onInvalid");
-            Objects.requireNonNull(onValid, "onValid");
+        public <R> R fold(@NonNull Function<? super E, ? extends R> onInvalid,
+                          @NonNull Function<? super A, ? extends R> onValid) {
             return onValid.apply(value);
         }
     }

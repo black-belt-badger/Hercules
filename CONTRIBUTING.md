@@ -26,7 +26,9 @@ Java 17 is the language compatibility baseline even if contributors run the buil
 - Include deterministic JUnit 5 tests with examples of expected behavior.
 - Add executable algebraic-law tests for abstractions that claim laws; distinguish observational equivalence from identity of Java function objects.
 - Cover failure and boundary cases, null contracts, immutability, allocation and stack safety where relevant.
-- Use JSpecify non-null-by-default conventions. Java annotations alone do not constitute static nullness verification unless an analyzer is configured.
+- Follow the [nullness policy](docs/nullness.md): JSpecify `@NullMarked` per package, explicit `@Nullable` type uses for intentionally nullable generic payloads, and Lombok `@NonNull` for required structural references (callbacks, combiners, suppliers, and container inputs). Do not put blanket runtime null checks on payload records or generic factories.
+- Preserve explicit runtime validation of null **structural callback results**, without triggering deferred functions prematurely. JSpecify annotations alone do not constitute static nullness verification unless an analyzer is configured (tracked in #41).
+- For `F3`–`F10` update `scripts/generate_functions.py` and regenerate the source files; never hand-edit generated Java.
 - Do not introduce a general FP hierarchy or require clients to wrap their applications in Hercules types to use one abstraction.
 
 ## Pull requests

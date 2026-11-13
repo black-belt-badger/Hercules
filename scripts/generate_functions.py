@@ -50,6 +50,7 @@ def generate(n):
         "import java.util.Objects;",
         "import java.util.function.BiFunction;",
         "import java.util.function.Function;", "",
+        "import lombok.NonNull;", "",
         "/**",
         f" * A function of {n} arguments, compatible with JDK unary and binary functions.",
         " *",
@@ -74,8 +75,7 @@ def generate(n):
         params=[("mapper", "result transformation, required at composition time")],
         returns="a lazily mapped function",
     ) + [
-        f"    default <S> {fn(args, 'S')} map(Function<? super R, ? extends S> mapper) {{",
-        '        Objects.requireNonNull(mapper, "mapper");',
+        f"    default <S> {fn(args, 'S')} map(@NonNull Function<? super R, ? extends S> mapper) {{",
         f"        return ({call}) -> mapper.apply(apply({call}));",
         "    }", "",
     ]
@@ -86,8 +86,7 @@ def generate(n):
         returns="a lazily composed function",
     ) + [
         f"    default <S> {fn(args, 'S')} flatMap(",
-        f"            Function<? super R, ? extends {fn(args, 'S')}> binder) {{",
-        '        Objects.requireNonNull(binder, "binder");',
+        f"            @NonNull Function<? super R, ? extends {fn(args, 'S')}> binder) {{",
         f'        return ({call}) -> Objects.requireNonNull(binder.apply(apply({call})),',
         f'                "flatMap returned a null function").apply({call});',
         "    }", "",
@@ -114,8 +113,7 @@ def generate(n):
             returns="a function accepting the transformed argument",
         ) + [
             f"    default <Z> {fn(target)} compose{i+1}(",
-            f"            Function<? super Z, ? extends {a}> before) {{",
-            '        Objects.requireNonNull(before, "before");',
+            f"            @NonNull Function<? super Z, ? extends {a}> before) {{",
             f"        return ({call}) -> apply({', '.join(transformed)});",
             "    }", "",
         ]
@@ -133,8 +131,7 @@ def generate(n):
         params=[("function", "a curried function accepting all arguments")],
         returns="an uncurried multi-argument function",
     ) + [
-        f"    static <{types}> {fn(args)} uncurry({curry(args)} function) {{",
-        '        Objects.requireNonNull(function, "function");',
+        f"    static <{types}> {fn(args)} uncurry(@NonNull {curry(args)} function) {{",
         f"        return ({call}) -> function{''.join(f'.apply({v})' for v in names)};",
         "    }",
         "}", "",

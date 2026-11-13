@@ -5,6 +5,8 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import lombok.NonNull;
+
 /**
  * A function of 9 arguments, compatible with JDK unary and binary functions.
  *
@@ -49,8 +51,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @param mapper result transformation, required at composition time
      * @return a lazily mapped function
      */
-    default <S> F9<A, B, C, D, E, F, G, H, I, S> map(Function<? super R, ? extends S> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <S> F9<A, B, C, D, E, F, G, H, I, S> map(@NonNull Function<? super R, ? extends S> mapper) {
         return (a, b, c, d, e, f, g, h, i) -> mapper.apply(apply(a, b, c, d, e, f, g, h, i));
     }
 
@@ -62,8 +63,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @return a lazily composed function
      */
     default <S> F9<A, B, C, D, E, F, G, H, I, S> flatMap(
-            Function<? super R, ? extends F9<A, B, C, D, E, F, G, H, I, S>> binder) {
-        Objects.requireNonNull(binder, "binder");
+            @NonNull Function<? super R, ? extends F9<A, B, C, D, E, F, G, H, I, S>> binder) {
         return (a, b, c, d, e, f, g, h, i) -> Objects.requireNonNull(binder.apply(apply(a, b, c, d, e, f, g, h, i)),
                 "flatMap returned a null function").apply(a, b, c, d, e, f, g, h, i);
     }
@@ -184,8 +184,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F9<Z, B, C, D, E, F, G, H, I, R> compose1(
-            Function<? super Z, ? extends A> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends A> before) {
         return (a, b, c, d, e, f, g, h, i) -> apply(before.apply(a), b, c, d, e, f, g, h, i);
     }
 
@@ -197,8 +196,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F9<A, Z, C, D, E, F, G, H, I, R> compose2(
-            Function<? super Z, ? extends B> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends B> before) {
         return (a, b, c, d, e, f, g, h, i) -> apply(a, before.apply(b), c, d, e, f, g, h, i);
     }
 
@@ -210,8 +208,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F9<A, B, Z, D, E, F, G, H, I, R> compose3(
-            Function<? super Z, ? extends C> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends C> before) {
         return (a, b, c, d, e, f, g, h, i) -> apply(a, b, before.apply(c), d, e, f, g, h, i);
     }
 
@@ -223,8 +220,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F9<A, B, C, Z, E, F, G, H, I, R> compose4(
-            Function<? super Z, ? extends D> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends D> before) {
         return (a, b, c, d, e, f, g, h, i) -> apply(a, b, c, before.apply(d), e, f, g, h, i);
     }
 
@@ -236,8 +232,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F9<A, B, C, D, Z, F, G, H, I, R> compose5(
-            Function<? super Z, ? extends E> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends E> before) {
         return (a, b, c, d, e, f, g, h, i) -> apply(a, b, c, d, before.apply(e), f, g, h, i);
     }
 
@@ -249,8 +244,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F9<A, B, C, D, E, Z, G, H, I, R> compose6(
-            Function<? super Z, ? extends F> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends F> before) {
         return (a, b, c, d, e, f, g, h, i) -> apply(a, b, c, d, e, before.apply(f), g, h, i);
     }
 
@@ -262,8 +256,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F9<A, B, C, D, E, F, Z, H, I, R> compose7(
-            Function<? super Z, ? extends G> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends G> before) {
         return (a, b, c, d, e, f, g, h, i) -> apply(a, b, c, d, e, f, before.apply(g), h, i);
     }
 
@@ -275,8 +268,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F9<A, B, C, D, E, F, G, Z, I, R> compose8(
-            Function<? super Z, ? extends H> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends H> before) {
         return (a, b, c, d, e, f, g, h, i) -> apply(a, b, c, d, e, f, g, before.apply(h), i);
     }
 
@@ -288,8 +280,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F9<A, B, C, D, E, F, G, H, Z, R> compose9(
-            Function<? super Z, ? extends I> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends I> before) {
         return (a, b, c, d, e, f, g, h, i) -> apply(a, b, c, d, e, f, g, h, before.apply(i));
     }
 
@@ -318,8 +309,7 @@ public interface F9<A, B, C, D, E, F, G, H, I, R> {
      * @param function a curried function accepting all arguments
      * @return an uncurried multi-argument function
      */
-    static <A, B, C, D, E, F, G, H, I, R> F9<A, B, C, D, E, F, G, H, I, R> uncurry(Function<A, Function<B, Function<C, Function<D, Function<E, Function<F, Function<G, Function<H, Function<I, R>>>>>>>>> function) {
-        Objects.requireNonNull(function, "function");
+    static <A, B, C, D, E, F, G, H, I, R> F9<A, B, C, D, E, F, G, H, I, R> uncurry(@NonNull Function<A, Function<B, Function<C, Function<D, Function<E, Function<F, Function<G, Function<H, Function<I, R>>>>>>>>> function) {
         return (a, b, c, d, e, f, g, h, i) -> function.apply(a).apply(b).apply(c).apply(d).apply(e).apply(f).apply(g).apply(h).apply(i);
     }
 }

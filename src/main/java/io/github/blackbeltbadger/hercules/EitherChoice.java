@@ -4,6 +4,8 @@ import java.util.Objects;
 import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 
+import lombok.NonNull;
+
 /**
  * An explicit choice policy for {@link Either}: prefer the first successful
  * (right) result and accumulate left values when both alternatives fail.
@@ -22,17 +24,7 @@ import java.util.function.Supplier;
  * @param combineLeft associative operation for two left values, in encounter order
  * @param <L> left-hand information carried by unsuccessful alternatives
  */
-public record EitherChoice<L>(L emptyLeft, BinaryOperator<L> combineLeft) {
-
-    /**
-     * Construct a choice policy, rejecting a null combination function.
-     *
-     * @param emptyLeft identity for combining failed alternatives
-     * @param combineLeft associative operation for two failed alternatives
-     */
-    public EitherChoice {
-        Objects.requireNonNull(combineLeft, "combineLeft");
-    }
+public record EitherChoice<L>(L emptyLeft, @NonNull BinaryOperator<L> combineLeft) {
 
     /**
      * Return the identity for choice.
@@ -54,8 +46,7 @@ public record EitherChoice<L>(L emptyLeft, BinaryOperator<L> combineLeft) {
      * @param second second alternative or lazy fallback
      * @return the first successful alternative, or combined left values
      */
-    public <R> Either<L, R> choose(Either<L, R> first, Either<L, R> second) {
-        Objects.requireNonNull(second, "second");
+    public <R> Either<L, R> choose(@NonNull Either<L, R> first, @NonNull Either<L, R> second) {
         return choose(first, () -> second);
     }
 
@@ -70,10 +61,7 @@ public record EitherChoice<L>(L emptyLeft, BinaryOperator<L> combineLeft) {
      * @return the first successful alternative, or combined left values
      */
     public <R> Either<L, R> choose(
-            Either<L, R> first, Supplier<? extends Either<L, R>> second) {
-        Objects.requireNonNull(first, "first");
-        Objects.requireNonNull(second, "second");
-
+            @NonNull Either<L, R> first, @NonNull Supplier<? extends Either<L, R>> second) {
         return first.fold(
                 left -> Objects.requireNonNull(second.get(), "choice returned null").fold(
                         nextLeft -> Either.left(combineLeft.apply(left, nextLeft)),

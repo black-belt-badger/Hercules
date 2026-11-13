@@ -5,6 +5,8 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import lombok.NonNull;
+
 /**
  * A function of 3 arguments, compatible with JDK unary and binary functions.
  *
@@ -37,8 +39,7 @@ public interface F3<A, B, C, R> {
      * @param mapper result transformation, required at composition time
      * @return a lazily mapped function
      */
-    default <S> F3<A, B, C, S> map(Function<? super R, ? extends S> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <S> F3<A, B, C, S> map(@NonNull Function<? super R, ? extends S> mapper) {
         return (a, b, c) -> mapper.apply(apply(a, b, c));
     }
 
@@ -50,8 +51,7 @@ public interface F3<A, B, C, R> {
      * @return a lazily composed function
      */
     default <S> F3<A, B, C, S> flatMap(
-            Function<? super R, ? extends F3<A, B, C, S>> binder) {
-        Objects.requireNonNull(binder, "binder");
+            @NonNull Function<? super R, ? extends F3<A, B, C, S>> binder) {
         return (a, b, c) -> Objects.requireNonNull(binder.apply(apply(a, b, c)),
                 "flatMap returned a null function").apply(a, b, c);
     }
@@ -85,8 +85,7 @@ public interface F3<A, B, C, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F3<Z, B, C, R> compose1(
-            Function<? super Z, ? extends A> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends A> before) {
         return (a, b, c) -> apply(before.apply(a), b, c);
     }
 
@@ -98,8 +97,7 @@ public interface F3<A, B, C, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F3<A, Z, C, R> compose2(
-            Function<? super Z, ? extends B> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends B> before) {
         return (a, b, c) -> apply(a, before.apply(b), c);
     }
 
@@ -111,8 +109,7 @@ public interface F3<A, B, C, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F3<A, B, Z, R> compose3(
-            Function<? super Z, ? extends C> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends C> before) {
         return (a, b, c) -> apply(a, b, before.apply(c));
     }
 
@@ -135,8 +132,7 @@ public interface F3<A, B, C, R> {
      * @param function a curried function accepting all arguments
      * @return an uncurried multi-argument function
      */
-    static <A, B, C, R> F3<A, B, C, R> uncurry(Function<A, Function<B, Function<C, R>>> function) {
-        Objects.requireNonNull(function, "function");
+    static <A, B, C, R> F3<A, B, C, R> uncurry(@NonNull Function<A, Function<B, Function<C, R>>> function) {
         return (a, b, c) -> function.apply(a).apply(b).apply(c);
     }
 }

@@ -56,7 +56,7 @@ int total = finalArgument.apply(10); // 55
 
 - Building adapters, currying and partial application never invokes the function.
 - Each evaluated adapter calls its underlying function once. Mapping calls the mapper once; binding invokes the binder and selected function once each. No memoization.
-- `map`, `flatMap`, `composeN` and `uncurry` reject null callbacks immediately. A `flatMap` binder returning a null function fails on invocation.
+- `map`, `flatMap`, `composeN` and `uncurry` reject null callback references immediately through Lombok-generated `@NonNull` checks. A `flatMap` binder returning a null function fails only when the composed function is invoked. See the [nullness policy](nullness.md).
 - `@NullMarked` applies by default. Express intentional nullable arguments and returns using JSpecify `@Nullable` type uses; no blanket runtime checks of argument values are added.
 - User exceptions propagate unchanged; order is left-to-right for arguments, then the original function, then the mapper/binder/selected function.
 - The algebraic laws hold for pure functions. Deeply nested adapter chains have no stack-safety guarantee.
