@@ -42,6 +42,8 @@ The Maven coordinates reserved for development are:
 io.github.blackbeltbadger:hercules:0.1.0-SNAPSHOT
 ```
 
+**Java API namespace:** `bbb.hercules` (imports such as `bbb.hercules.Either` and `bbb.hercules.Validation`). The shorter BBB Java package name is intentionally independent of the unchanged Maven groupId. This pre-release package migration requires consumers of earlier snapshots to update their Java imports; it changes binary names and does not ship compatibility wrappers.
+
 The project is a **library JAR**, not an executable application. Its production dependencies are Guava, JSpecify annotations, and compile-time-only Lombok. Tests use JUnit 5 and **Instancio** (test scope only) for randomized, reproducible law tests.
 
 ```bash
