@@ -133,10 +133,11 @@ Validation<@Nullable String, @Nullable Integer> result = Validation.valid(null);
 ```
 
 The variant remains `Valid`, not `Invalid` or an absent state.
-Non-null callback references and combiners are validated at runtime.
-Record constructors currently follow the project's existing type-use
-nullness conventions; broad runtime checks on payloads are tracked in
-#35 and must not silently change nullable use cases.
+Lombok `@NonNull` validates required callback references, input
+containers and combiner references at runtime, including record
+constructor combiners. Generic value and error payloads are **not**
+subject to blanket runtime null checks, preserving explicitly nullable
+type arguments. See the [repository nullness policy](nullness.md).
 
 These are **shallowly immutable** records; mutable payload objects
 are not cloned.

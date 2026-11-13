@@ -5,6 +5,8 @@ import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
+import lombok.NonNull;
+
 /**
  * Inclusive choice: only a left value ({@link This}), only a right value
  * ({@link That}), or both ({@link Both}).
@@ -32,9 +34,9 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param onBoth handler for the both-values variant
      * @return the result of the handler for the present variant
      */
-    <T> T fold(Function<? super L, ? extends T> onLeft,
-               Function<? super R, ? extends T> onRight,
-               BiFunction<? super L, ? super R, ? extends T> onBoth);
+    <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+               @NonNull Function<? super R, ? extends T> onRight,
+               @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth);
 
     /**
      * Construct a left-only value.
@@ -80,8 +82,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param mapper payload mapping function; must not be null
      * @return a value with the right payload transformed if present
      */
-    default <T> These<L, T> map(Function<? super R, ? extends T> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <T> These<L, T> map(@NonNull Function<? super R, ? extends T> mapper) {
         return fold(
                 These::left,
                 value -> These.right(mapper.apply(value)),
@@ -95,8 +96,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param mapper payload mapping function; must not be null
      * @return a value with the left payload transformed if present
      */
-    default <T> These<T, R> mapLeft(Function<? super L, ? extends T> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <T> These<T, R> mapLeft(@NonNull Function<? super L, ? extends T> mapper) {
         return fold(
                 value -> These.left(mapper.apply(value)),
                 These::right,
@@ -113,10 +113,8 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @return a value with whichever evidence payloads are present transformed
      */
     default <A, B> These<A, B> bimap(
-            Function<? super L, ? extends A> leftMapper,
-            Function<? super R, ? extends B> rightMapper) {
-        Objects.requireNonNull(leftMapper, "leftMapper");
-        Objects.requireNonNull(rightMapper, "rightMapper");
+            @NonNull Function<? super L, ? extends A> leftMapper,
+            @NonNull Function<? super R, ? extends B> rightMapper) {
         return fold(
                 left -> These.left(leftMapper.apply(left)),
                 right -> These.right(rightMapper.apply(right)),
@@ -162,11 +160,8 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @return the result of dependent right-biased computation
      */
     default <T> These<L, T> flatMap(
-            Function<? super R, ? extends These<L, T>> binder,
-            BinaryOperator<L> combineLeft) {
-        Objects.requireNonNull(binder, "binder");
-        Objects.requireNonNull(combineLeft, "combineLeft");
-
+            @NonNull Function<? super R, ? extends These<L, T>> binder,
+            @NonNull BinaryOperator<L> combineLeft) {
         return fold(
                 These::left,
                 right -> Objects.requireNonNull(binder.apply(right), "flatMap returned null"),
@@ -191,12 +186,9 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
     record This<L, R>(L value) implements These<L, R> {
 
         @Override
-        public <T> T fold(Function<? super L, ? extends T> onLeft,
-                          Function<? super R, ? extends T> onRight,
-                          BiFunction<? super L, ? super R, ? extends T> onBoth) {
-            Objects.requireNonNull(onLeft, "onLeft");
-            Objects.requireNonNull(onRight, "onRight");
-            Objects.requireNonNull(onBoth, "onBoth");
+        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+                          @NonNull Function<? super R, ? extends T> onRight,
+                          @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth) {
             return onLeft.apply(value);
         }
     }
@@ -211,12 +203,9 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
     record That<L, R>(R value) implements These<L, R> {
 
         @Override
-        public <T> T fold(Function<? super L, ? extends T> onLeft,
-                          Function<? super R, ? extends T> onRight,
-                          BiFunction<? super L, ? super R, ? extends T> onBoth) {
-            Objects.requireNonNull(onLeft, "onLeft");
-            Objects.requireNonNull(onRight, "onRight");
-            Objects.requireNonNull(onBoth, "onBoth");
+        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+                          @NonNull Function<? super R, ? extends T> onRight,
+                          @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth) {
             return onRight.apply(value);
         }
     }
@@ -232,12 +221,9 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
     record Both<L, R>(L left, R right) implements These<L, R> {
 
         @Override
-        public <T> T fold(Function<? super L, ? extends T> onLeft,
-                          Function<? super R, ? extends T> onRight,
-                          BiFunction<? super L, ? super R, ? extends T> onBoth) {
-            Objects.requireNonNull(onLeft, "onLeft");
-            Objects.requireNonNull(onRight, "onRight");
-            Objects.requireNonNull(onBoth, "onBoth");
+        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+                          @NonNull Function<? super R, ? extends T> onRight,
+                          @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth) {
             return onBoth.apply(left, right);
         }
     }

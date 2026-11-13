@@ -5,6 +5,8 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import lombok.NonNull;
+
 /**
  * A function of 5 arguments, compatible with JDK unary and binary functions.
  *
@@ -41,8 +43,7 @@ public interface F5<A, B, C, D, E, R> {
      * @param mapper result transformation, required at composition time
      * @return a lazily mapped function
      */
-    default <S> F5<A, B, C, D, E, S> map(Function<? super R, ? extends S> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <S> F5<A, B, C, D, E, S> map(@NonNull Function<? super R, ? extends S> mapper) {
         return (a, b, c, d, e) -> mapper.apply(apply(a, b, c, d, e));
     }
 
@@ -54,8 +55,7 @@ public interface F5<A, B, C, D, E, R> {
      * @return a lazily composed function
      */
     default <S> F5<A, B, C, D, E, S> flatMap(
-            Function<? super R, ? extends F5<A, B, C, D, E, S>> binder) {
-        Objects.requireNonNull(binder, "binder");
+            @NonNull Function<? super R, ? extends F5<A, B, C, D, E, S>> binder) {
         return (a, b, c, d, e) -> Objects.requireNonNull(binder.apply(apply(a, b, c, d, e)),
                 "flatMap returned a null function").apply(a, b, c, d, e);
     }
@@ -114,8 +114,7 @@ public interface F5<A, B, C, D, E, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F5<Z, B, C, D, E, R> compose1(
-            Function<? super Z, ? extends A> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends A> before) {
         return (a, b, c, d, e) -> apply(before.apply(a), b, c, d, e);
     }
 
@@ -127,8 +126,7 @@ public interface F5<A, B, C, D, E, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F5<A, Z, C, D, E, R> compose2(
-            Function<? super Z, ? extends B> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends B> before) {
         return (a, b, c, d, e) -> apply(a, before.apply(b), c, d, e);
     }
 
@@ -140,8 +138,7 @@ public interface F5<A, B, C, D, E, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F5<A, B, Z, D, E, R> compose3(
-            Function<? super Z, ? extends C> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends C> before) {
         return (a, b, c, d, e) -> apply(a, b, before.apply(c), d, e);
     }
 
@@ -153,8 +150,7 @@ public interface F5<A, B, C, D, E, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F5<A, B, C, Z, E, R> compose4(
-            Function<? super Z, ? extends D> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends D> before) {
         return (a, b, c, d, e) -> apply(a, b, c, before.apply(d), e);
     }
 
@@ -166,8 +162,7 @@ public interface F5<A, B, C, D, E, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F5<A, B, C, D, Z, R> compose5(
-            Function<? super Z, ? extends E> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends E> before) {
         return (a, b, c, d, e) -> apply(a, b, c, d, before.apply(e));
     }
 
@@ -192,8 +187,7 @@ public interface F5<A, B, C, D, E, R> {
      * @param function a curried function accepting all arguments
      * @return an uncurried multi-argument function
      */
-    static <A, B, C, D, E, R> F5<A, B, C, D, E, R> uncurry(Function<A, Function<B, Function<C, Function<D, Function<E, R>>>>> function) {
-        Objects.requireNonNull(function, "function");
+    static <A, B, C, D, E, R> F5<A, B, C, D, E, R> uncurry(@NonNull Function<A, Function<B, Function<C, Function<D, Function<E, R>>>>> function) {
         return (a, b, c, d, e) -> function.apply(a).apply(b).apply(c).apply(d).apply(e);
     }
 }

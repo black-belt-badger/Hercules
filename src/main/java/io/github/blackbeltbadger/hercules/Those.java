@@ -4,6 +4,8 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import lombok.NonNull;
+
 /**
  * Two possible kinds of evidence, together with an explanation when neither is present.
  *
@@ -36,10 +38,10 @@ public sealed interface Those<L, R, E>
      * @param onNeither handler for the neither variant
      * @return the result of the handler for the present variant
      */
-    <T> T fold(Function<? super L, ? extends T> onLeft,
-               Function<? super R, ? extends T> onRight,
-               BiFunction<? super L, ? super R, ? extends T> onBoth,
-               Function<? super E, ? extends T> onNeither);
+    <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+               @NonNull Function<? super R, ? extends T> onRight,
+               @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth,
+               @NonNull Function<? super E, ? extends T> onNeither);
 
     /**
      * Construct left-only evidence.
@@ -101,8 +103,7 @@ public sealed interface Those<L, R, E>
      * @param mapper payload mapping function; must not be null
      * @return a value with the right payload transformed if present
      */
-    default <T> Those<L, T, E> map(Function<? super R, ? extends T> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <T> Those<L, T, E> map(@NonNull Function<? super R, ? extends T> mapper) {
         return fold(
                 Those::left,
                 right -> Those.right(mapper.apply(right)),
@@ -117,8 +118,7 @@ public sealed interface Those<L, R, E>
      * @param mapper payload mapping function; must not be null
      * @return a value with the left payload transformed if present
      */
-    default <T> Those<T, R, E> mapLeft(Function<? super L, ? extends T> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <T> Those<T, R, E> mapLeft(@NonNull Function<? super L, ? extends T> mapper) {
         return fold(
                 left -> Those.left(mapper.apply(left)),
                 Those::right,
@@ -133,8 +133,7 @@ public sealed interface Those<L, R, E>
      * @param mapper payload mapping function; must not be null
      * @return a value with the explanation transformed if present
      */
-    default <T> Those<L, R, T> mapNeither(Function<? super E, ? extends T> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <T> Those<L, R, T> mapNeither(@NonNull Function<? super E, ? extends T> mapper) {
         return fold(
                 Those::left,
                 Those::right,
@@ -152,10 +151,8 @@ public sealed interface Those<L, R, E>
      * @return a value with whichever evidence payloads are present transformed
      */
     default <C, D> Those<C, D, E> bimap(
-            Function<? super L, ? extends C> leftMapper,
-            Function<? super R, ? extends D> rightMapper) {
-        Objects.requireNonNull(leftMapper, "leftMapper");
-        Objects.requireNonNull(rightMapper, "rightMapper");
+            @NonNull Function<? super L, ? extends C> leftMapper,
+            @NonNull Function<? super R, ? extends D> rightMapper) {
         return fold(
                 left -> Those.left(leftMapper.apply(left)),
                 right -> Those.right(rightMapper.apply(right)),
@@ -175,12 +172,9 @@ public sealed interface Those<L, R, E>
      * @return a value with all applicable payloads transformed
      */
     default <C, D, F> Those<C, D, F> trimap(
-            Function<? super L, ? extends C> leftMapper,
-            Function<? super R, ? extends D> rightMapper,
-            Function<? super E, ? extends F> neitherMapper) {
-        Objects.requireNonNull(leftMapper, "leftMapper");
-        Objects.requireNonNull(rightMapper, "rightMapper");
-        Objects.requireNonNull(neitherMapper, "neitherMapper");
+            @NonNull Function<? super L, ? extends C> leftMapper,
+            @NonNull Function<? super R, ? extends D> rightMapper,
+            @NonNull Function<? super E, ? extends F> neitherMapper) {
         return fold(
                 left -> Those.left(leftMapper.apply(left)),
                 right -> Those.right(rightMapper.apply(right)),
@@ -223,8 +217,7 @@ public sealed interface Those<L, R, E>
      * @param value value to wrap in the selected variant
      * @return the matching four-way value
      */
-    static <L, R, E> Those<L, R, E> fromEither(Either<E, These<L, R>> value) {
-        Objects.requireNonNull(value, "value");
+    static <L, R, E> Those<L, R, E> fromEither(@NonNull Either<E, These<L, R>> value) {
         return value.fold(
                 Those::neither,
                 evidence -> Objects.requireNonNull(evidence, "evidence").fold(
@@ -243,14 +236,10 @@ public sealed interface Those<L, R, E>
      */
     record This<L, R, E>(L value) implements Those<L, R, E> {
         @Override
-        public <T> T fold(Function<? super L, ? extends T> onLeft,
-                          Function<? super R, ? extends T> onRight,
-                          BiFunction<? super L, ? super R, ? extends T> onBoth,
-                          Function<? super E, ? extends T> onNeither) {
-            Objects.requireNonNull(onLeft, "onLeft");
-            Objects.requireNonNull(onRight, "onRight");
-            Objects.requireNonNull(onBoth, "onBoth");
-            Objects.requireNonNull(onNeither, "onNeither");
+        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+                          @NonNull Function<? super R, ? extends T> onRight,
+                          @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth,
+                          @NonNull Function<? super E, ? extends T> onNeither) {
             return onLeft.apply(value);
         }
     }
@@ -265,14 +254,10 @@ public sealed interface Those<L, R, E>
      */
     record That<L, R, E>(R value) implements Those<L, R, E> {
         @Override
-        public <T> T fold(Function<? super L, ? extends T> onLeft,
-                          Function<? super R, ? extends T> onRight,
-                          BiFunction<? super L, ? super R, ? extends T> onBoth,
-                          Function<? super E, ? extends T> onNeither) {
-            Objects.requireNonNull(onLeft, "onLeft");
-            Objects.requireNonNull(onRight, "onRight");
-            Objects.requireNonNull(onBoth, "onBoth");
-            Objects.requireNonNull(onNeither, "onNeither");
+        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+                          @NonNull Function<? super R, ? extends T> onRight,
+                          @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth,
+                          @NonNull Function<? super E, ? extends T> onNeither) {
             return onRight.apply(value);
         }
     }
@@ -288,14 +273,10 @@ public sealed interface Those<L, R, E>
      */
     record Both<L, R, E>(L left, R right) implements Those<L, R, E> {
         @Override
-        public <T> T fold(Function<? super L, ? extends T> onLeft,
-                          Function<? super R, ? extends T> onRight,
-                          BiFunction<? super L, ? super R, ? extends T> onBoth,
-                          Function<? super E, ? extends T> onNeither) {
-            Objects.requireNonNull(onLeft, "onLeft");
-            Objects.requireNonNull(onRight, "onRight");
-            Objects.requireNonNull(onBoth, "onBoth");
-            Objects.requireNonNull(onNeither, "onNeither");
+        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+                          @NonNull Function<? super R, ? extends T> onRight,
+                          @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth,
+                          @NonNull Function<? super E, ? extends T> onNeither) {
             return onBoth.apply(left, right);
         }
     }
@@ -310,14 +291,10 @@ public sealed interface Those<L, R, E>
      */
     record Neither<L, R, E>(E explanation) implements Those<L, R, E> {
         @Override
-        public <T> T fold(Function<? super L, ? extends T> onLeft,
-                          Function<? super R, ? extends T> onRight,
-                          BiFunction<? super L, ? super R, ? extends T> onBoth,
-                          Function<? super E, ? extends T> onNeither) {
-            Objects.requireNonNull(onLeft, "onLeft");
-            Objects.requireNonNull(onRight, "onRight");
-            Objects.requireNonNull(onBoth, "onBoth");
-            Objects.requireNonNull(onNeither, "onNeither");
+        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+                          @NonNull Function<? super R, ? extends T> onRight,
+                          @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth,
+                          @NonNull Function<? super E, ? extends T> onNeither) {
             return onNeither.apply(explanation);
         }
     }

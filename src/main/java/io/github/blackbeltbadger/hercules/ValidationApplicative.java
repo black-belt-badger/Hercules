@@ -1,9 +1,10 @@
 package io.github.blackbeltbadger.hercules;
 
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+
+import lombok.NonNull;
 
 /**
  * An explicit error-accumulation policy for independent {@link Validation}
@@ -22,16 +23,7 @@ import java.util.function.Function;
  * @param <E> validation error payload type
  * @param combineErrors associative error-combination operation
  */
-public record ValidationApplicative<E>(BinaryOperator<E> combineErrors) {
-
-    /**
-     * Construct an accumulation policy; a null combiner is rejected.
-     *
-     * @param combineErrors associative operation for combining two errors
-     */
-    public ValidationApplicative {
-        Objects.requireNonNull(combineErrors, "combineErrors");
-    }
+public record ValidationApplicative<E>(@NonNull BinaryOperator<E> combineErrors) {
 
     /**
      * Lift a value into the valid case.
@@ -61,13 +53,9 @@ public record ValidationApplicative<E>(BinaryOperator<E> combineErrors) {
      * @return Valid of the mapped result, or Invalid of accumulated errors
      */
     public <A, B, R> Validation<E, R> map2(
-            Validation<E, A> left,
-            Validation<E, B> right,
-            BiFunction<? super A, ? super B, ? extends R> mapper) {
-        Objects.requireNonNull(left, "left");
-        Objects.requireNonNull(right, "right");
-        Objects.requireNonNull(mapper, "mapper");
-
+            @NonNull Validation<E, A> left,
+            @NonNull Validation<E, B> right,
+            @NonNull BiFunction<? super A, ? super B, ? extends R> mapper) {
         return left.fold(
                 leftError -> right.fold(
                         rightError -> Validation.invalid(combineErrors.apply(leftError, rightError)),
@@ -88,8 +76,8 @@ public record ValidationApplicative<E>(BinaryOperator<E> combineErrors) {
      * @return a valid mapped result, or accumulated invalid errors
      */
     public <A, B> Validation<E, B> ap(
-            Validation<E, ? extends Function<? super A, ? extends B>> function,
-            Validation<E, A> value) {
+            @NonNull Validation<E, ? extends Function<? super A, ? extends B>> function,
+            @NonNull Validation<E, A> value) {
         return map2(function, value, (mapper, input) -> mapper.apply(input));
     }
 }

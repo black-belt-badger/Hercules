@@ -5,6 +5,8 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import lombok.NonNull;
+
 /**
  * A function of 6 arguments, compatible with JDK unary and binary functions.
  *
@@ -43,8 +45,7 @@ public interface F6<A, B, C, D, E, F, R> {
      * @param mapper result transformation, required at composition time
      * @return a lazily mapped function
      */
-    default <S> F6<A, B, C, D, E, F, S> map(Function<? super R, ? extends S> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <S> F6<A, B, C, D, E, F, S> map(@NonNull Function<? super R, ? extends S> mapper) {
         return (a, b, c, d, e, f) -> mapper.apply(apply(a, b, c, d, e, f));
     }
 
@@ -56,8 +57,7 @@ public interface F6<A, B, C, D, E, F, R> {
      * @return a lazily composed function
      */
     default <S> F6<A, B, C, D, E, F, S> flatMap(
-            Function<? super R, ? extends F6<A, B, C, D, E, F, S>> binder) {
-        Objects.requireNonNull(binder, "binder");
+            @NonNull Function<? super R, ? extends F6<A, B, C, D, E, F, S>> binder) {
         return (a, b, c, d, e, f) -> Objects.requireNonNull(binder.apply(apply(a, b, c, d, e, f)),
                 "flatMap returned a null function").apply(a, b, c, d, e, f);
     }
@@ -130,8 +130,7 @@ public interface F6<A, B, C, D, E, F, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F6<Z, B, C, D, E, F, R> compose1(
-            Function<? super Z, ? extends A> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends A> before) {
         return (a, b, c, d, e, f) -> apply(before.apply(a), b, c, d, e, f);
     }
 
@@ -143,8 +142,7 @@ public interface F6<A, B, C, D, E, F, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F6<A, Z, C, D, E, F, R> compose2(
-            Function<? super Z, ? extends B> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends B> before) {
         return (a, b, c, d, e, f) -> apply(a, before.apply(b), c, d, e, f);
     }
 
@@ -156,8 +154,7 @@ public interface F6<A, B, C, D, E, F, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F6<A, B, Z, D, E, F, R> compose3(
-            Function<? super Z, ? extends C> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends C> before) {
         return (a, b, c, d, e, f) -> apply(a, b, before.apply(c), d, e, f);
     }
 
@@ -169,8 +166,7 @@ public interface F6<A, B, C, D, E, F, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F6<A, B, C, Z, E, F, R> compose4(
-            Function<? super Z, ? extends D> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends D> before) {
         return (a, b, c, d, e, f) -> apply(a, b, c, before.apply(d), e, f);
     }
 
@@ -182,8 +178,7 @@ public interface F6<A, B, C, D, E, F, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F6<A, B, C, D, Z, F, R> compose5(
-            Function<? super Z, ? extends E> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends E> before) {
         return (a, b, c, d, e, f) -> apply(a, b, c, d, before.apply(e), f);
     }
 
@@ -195,8 +190,7 @@ public interface F6<A, B, C, D, E, F, R> {
      * @return a function accepting the transformed argument
      */
     default <Z> F6<A, B, C, D, E, Z, R> compose6(
-            Function<? super Z, ? extends F> before) {
-        Objects.requireNonNull(before, "before");
+            @NonNull Function<? super Z, ? extends F> before) {
         return (a, b, c, d, e, f) -> apply(a, b, c, d, e, before.apply(f));
     }
 
@@ -222,8 +216,7 @@ public interface F6<A, B, C, D, E, F, R> {
      * @param function a curried function accepting all arguments
      * @return an uncurried multi-argument function
      */
-    static <A, B, C, D, E, F, R> F6<A, B, C, D, E, F, R> uncurry(Function<A, Function<B, Function<C, Function<D, Function<E, Function<F, R>>>>>> function) {
-        Objects.requireNonNull(function, "function");
+    static <A, B, C, D, E, F, R> F6<A, B, C, D, E, F, R> uncurry(@NonNull Function<A, Function<B, Function<C, Function<D, Function<E, Function<F, R>>>>>> function) {
         return (a, b, c, d, e, f) -> function.apply(a).apply(b).apply(c).apply(d).apply(e).apply(f);
     }
 }

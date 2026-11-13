@@ -4,6 +4,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import lombok.NonNull;
+
 /**
  * An exclusive choice between a left value and a right value.
  *
@@ -30,8 +32,8 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param onRight handler for the right-only variant
      * @return the result of the handler for the present variant
      */
-    <T> T fold(Function<? super L, ? extends T> onLeft,
-               Function<? super R, ? extends T> onRight);
+    <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+               @NonNull Function<? super R, ? extends T> onRight);
 
     /**
      * Construct a left value.
@@ -64,8 +66,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param mapper payload mapping function; must not be null
      * @return a value with the right payload transformed if present
      */
-    default <T> Either<L, T> map(Function<? super R, ? extends T> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <T> Either<L, T> map(@NonNull Function<? super R, ? extends T> mapper) {
         return fold(
                 left -> Either.<L, T>left(left),
                 right -> Either.<L, T>right(mapper.apply(right)));
@@ -78,8 +79,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param mapper payload mapping function; must not be null
      * @return a value with the left payload transformed if present
      */
-    default <T> Either<T, R> mapLeft(Function<? super L, ? extends T> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+    default <T> Either<T, R> mapLeft(@NonNull Function<? super L, ? extends T> mapper) {
         return fold(
                 left -> Either.<T, R>left(mapper.apply(left)),
                 right -> Either.<T, R>right(right));
@@ -94,10 +94,8 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param rightMapper mapping function for right values; must not be null
      * @return a value with whichever evidence payloads are present transformed
      */
-    default <A, B> Either<A, B> bimap(Function<? super L, ? extends A> leftMapper,
-                                     Function<? super R, ? extends B> rightMapper) {
-        Objects.requireNonNull(leftMapper, "leftMapper");
-        Objects.requireNonNull(rightMapper, "rightMapper");
+    default <A, B> Either<A, B> bimap(@NonNull Function<? super L, ? extends A> leftMapper,
+                                     @NonNull Function<? super R, ? extends B> rightMapper) {
         return fold(
                 left -> Either.<A, B>left(leftMapper.apply(left)),
                 right -> Either.<A, B>right(rightMapper.apply(right)));
@@ -111,8 +109,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param binder right-biased dependent function; must not be null
      * @return the result of dependent right-biased computation
      */
-    default <T> Either<L, T> flatMap(Function<? super R, ? extends Either<L, T>> binder) {
-        Objects.requireNonNull(binder, "binder");
+    default <T> Either<L, T> flatMap(@NonNull Function<? super R, ? extends Either<L, T>> binder) {
         return fold(
                 left -> Either.<L, T>left(left),
                 right -> Objects.requireNonNull(binder.apply(right), "flatMap returned null"));
@@ -154,8 +151,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param recovery function converting a left value to a right value
      * @return the original right value or the recovered right value
      */
-    default Either<L, R> recover(Function<? super L, ? extends R> recovery) {
-        Objects.requireNonNull(recovery, "recovery");
+    default Either<L, R> recover(@NonNull Function<? super L, ? extends R> recovery) {
         return fold(
                 left -> Either.<L, R>right(recovery.apply(left)),
                 right -> Either.<L, R>right(right));
@@ -181,10 +177,8 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
     record Left<L, R>(L value) implements Either<L, R> {
 
         @Override
-        public <T> T fold(Function<? super L, ? extends T> onLeft,
-                          Function<? super R, ? extends T> onRight) {
-            Objects.requireNonNull(onLeft, "onLeft");
-            Objects.requireNonNull(onRight, "onRight");
+        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+                          @NonNull Function<? super R, ? extends T> onRight) {
             return onLeft.apply(value);
         }
     }
@@ -199,10 +193,8 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
     record Right<L, R>(R value) implements Either<L, R> {
 
         @Override
-        public <T> T fold(Function<? super L, ? extends T> onLeft,
-                          Function<? super R, ? extends T> onRight) {
-            Objects.requireNonNull(onLeft, "onLeft");
-            Objects.requireNonNull(onRight, "onRight");
+        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+                          @NonNull Function<? super R, ? extends T> onRight) {
             return onRight.apply(value);
         }
     }
