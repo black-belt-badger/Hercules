@@ -145,4 +145,292 @@ public record ValidationApplicative<E extends @Nullable Object>(@NonNull BinaryO
         return accumulated.map(successes ->
                 Collections.unmodifiableList(new ArrayList<>(successes)));
     }
+
+    // BEGIN generated map3-map10 (scripts/generate_validation_mapn.py)
+
+    /**
+     * Combine 3 independent validations, accumulating all errors in input order.
+     *
+     * <p>Input validations are already evaluated. Errors combine left to right,
+     * with no identity or commutativity requirement. The mapper runs exactly
+     * once only when all inputs are Valid; errors from callbacks propagate.
+     *
+     * @param <A> successful value type of argument 1
+     * @param <B> successful value type of argument 2
+     * @param <C> successful value type of argument 3
+     * @param <R> mapped result type
+     * @param a independent validation 1
+     * @param b independent validation 2
+     * @param c independent validation 3
+     * @param mapper function applied when all arguments are valid
+     * @return a mapped successful value, or accumulated errors
+     */
+    public <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, R extends @Nullable Object> Validation<E, R> map3(
+            @NonNull Validation<E, A> a,
+            @NonNull Validation<E, B> b,
+            @NonNull Validation<E, C> c,
+            @NonNull F3<? super A, ? super B, ? super C, ? extends R> mapper) {
+        return ap(ap(ap(pure(mapper.curried()), a), b), c);
+    }
+
+    /**
+     * Combine 4 independent validations, accumulating all errors in input order.
+     *
+     * <p>Input validations are already evaluated. Errors combine left to right,
+     * with no identity or commutativity requirement. The mapper runs exactly
+     * once only when all inputs are Valid; errors from callbacks propagate.
+     *
+     * @param <A> successful value type of argument 1
+     * @param <B> successful value type of argument 2
+     * @param <C> successful value type of argument 3
+     * @param <D> successful value type of argument 4
+     * @param <R> mapped result type
+     * @param a independent validation 1
+     * @param b independent validation 2
+     * @param c independent validation 3
+     * @param d independent validation 4
+     * @param mapper function applied when all arguments are valid
+     * @return a mapped successful value, or accumulated errors
+     */
+    public <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, R extends @Nullable Object> Validation<E, R> map4(
+            @NonNull Validation<E, A> a,
+            @NonNull Validation<E, B> b,
+            @NonNull Validation<E, C> c,
+            @NonNull Validation<E, D> d,
+            @NonNull F4<? super A, ? super B, ? super C, ? super D, ? extends R> mapper) {
+        return ap(ap(ap(ap(pure(mapper.curried()), a), b), c), d);
+    }
+
+    /**
+     * Combine 5 independent validations, accumulating all errors in input order.
+     *
+     * <p>Input validations are already evaluated. Errors combine left to right,
+     * with no identity or commutativity requirement. The mapper runs exactly
+     * once only when all inputs are Valid; errors from callbacks propagate.
+     *
+     * @param <A> successful value type of argument 1
+     * @param <B> successful value type of argument 2
+     * @param <C> successful value type of argument 3
+     * @param <D> successful value type of argument 4
+     * @param <F> successful value type of argument 5
+     * @param <R> mapped result type
+     * @param a independent validation 1
+     * @param b independent validation 2
+     * @param c independent validation 3
+     * @param d independent validation 4
+     * @param f independent validation 5
+     * @param mapper function applied when all arguments are valid
+     * @return a mapped successful value, or accumulated errors
+     */
+    public <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, F extends @Nullable Object, R extends @Nullable Object> Validation<E, R> map5(
+            @NonNull Validation<E, A> a,
+            @NonNull Validation<E, B> b,
+            @NonNull Validation<E, C> c,
+            @NonNull Validation<E, D> d,
+            @NonNull Validation<E, F> f,
+            @NonNull F5<? super A, ? super B, ? super C, ? super D, ? super F, ? extends R> mapper) {
+        return ap(ap(ap(ap(ap(pure(mapper.curried()), a), b), c), d), f);
+    }
+
+    /**
+     * Combine 6 independent validations, accumulating all errors in input order.
+     *
+     * <p>Input validations are already evaluated. Errors combine left to right,
+     * with no identity or commutativity requirement. The mapper runs exactly
+     * once only when all inputs are Valid; errors from callbacks propagate.
+     *
+     * @param <A> successful value type of argument 1
+     * @param <B> successful value type of argument 2
+     * @param <C> successful value type of argument 3
+     * @param <D> successful value type of argument 4
+     * @param <F> successful value type of argument 5
+     * @param <G> successful value type of argument 6
+     * @param <R> mapped result type
+     * @param a independent validation 1
+     * @param b independent validation 2
+     * @param c independent validation 3
+     * @param d independent validation 4
+     * @param f independent validation 5
+     * @param g independent validation 6
+     * @param mapper function applied when all arguments are valid
+     * @return a mapped successful value, or accumulated errors
+     */
+    public <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, F extends @Nullable Object, G extends @Nullable Object, R extends @Nullable Object> Validation<E, R> map6(
+            @NonNull Validation<E, A> a,
+            @NonNull Validation<E, B> b,
+            @NonNull Validation<E, C> c,
+            @NonNull Validation<E, D> d,
+            @NonNull Validation<E, F> f,
+            @NonNull Validation<E, G> g,
+            @NonNull F6<? super A, ? super B, ? super C, ? super D, ? super F, ? super G, ? extends R> mapper) {
+        return ap(ap(ap(ap(ap(ap(pure(mapper.curried()), a), b), c), d), f), g);
+    }
+
+    /**
+     * Combine 7 independent validations, accumulating all errors in input order.
+     *
+     * <p>Input validations are already evaluated. Errors combine left to right,
+     * with no identity or commutativity requirement. The mapper runs exactly
+     * once only when all inputs are Valid; errors from callbacks propagate.
+     *
+     * @param <A> successful value type of argument 1
+     * @param <B> successful value type of argument 2
+     * @param <C> successful value type of argument 3
+     * @param <D> successful value type of argument 4
+     * @param <F> successful value type of argument 5
+     * @param <G> successful value type of argument 6
+     * @param <H> successful value type of argument 7
+     * @param <R> mapped result type
+     * @param a independent validation 1
+     * @param b independent validation 2
+     * @param c independent validation 3
+     * @param d independent validation 4
+     * @param f independent validation 5
+     * @param g independent validation 6
+     * @param h independent validation 7
+     * @param mapper function applied when all arguments are valid
+     * @return a mapped successful value, or accumulated errors
+     */
+    public <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, F extends @Nullable Object, G extends @Nullable Object, H extends @Nullable Object, R extends @Nullable Object> Validation<E, R> map7(
+            @NonNull Validation<E, A> a,
+            @NonNull Validation<E, B> b,
+            @NonNull Validation<E, C> c,
+            @NonNull Validation<E, D> d,
+            @NonNull Validation<E, F> f,
+            @NonNull Validation<E, G> g,
+            @NonNull Validation<E, H> h,
+            @NonNull F7<? super A, ? super B, ? super C, ? super D, ? super F, ? super G, ? super H, ? extends R> mapper) {
+        return ap(ap(ap(ap(ap(ap(ap(pure(mapper.curried()), a), b), c), d), f), g), h);
+    }
+
+    /**
+     * Combine 8 independent validations, accumulating all errors in input order.
+     *
+     * <p>Input validations are already evaluated. Errors combine left to right,
+     * with no identity or commutativity requirement. The mapper runs exactly
+     * once only when all inputs are Valid; errors from callbacks propagate.
+     *
+     * @param <A> successful value type of argument 1
+     * @param <B> successful value type of argument 2
+     * @param <C> successful value type of argument 3
+     * @param <D> successful value type of argument 4
+     * @param <F> successful value type of argument 5
+     * @param <G> successful value type of argument 6
+     * @param <H> successful value type of argument 7
+     * @param <I> successful value type of argument 8
+     * @param <R> mapped result type
+     * @param a independent validation 1
+     * @param b independent validation 2
+     * @param c independent validation 3
+     * @param d independent validation 4
+     * @param f independent validation 5
+     * @param g independent validation 6
+     * @param h independent validation 7
+     * @param i independent validation 8
+     * @param mapper function applied when all arguments are valid
+     * @return a mapped successful value, or accumulated errors
+     */
+    public <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, F extends @Nullable Object, G extends @Nullable Object, H extends @Nullable Object, I extends @Nullable Object, R extends @Nullable Object> Validation<E, R> map8(
+            @NonNull Validation<E, A> a,
+            @NonNull Validation<E, B> b,
+            @NonNull Validation<E, C> c,
+            @NonNull Validation<E, D> d,
+            @NonNull Validation<E, F> f,
+            @NonNull Validation<E, G> g,
+            @NonNull Validation<E, H> h,
+            @NonNull Validation<E, I> i,
+            @NonNull F8<? super A, ? super B, ? super C, ? super D, ? super F, ? super G, ? super H, ? super I, ? extends R> mapper) {
+        return ap(ap(ap(ap(ap(ap(ap(ap(pure(mapper.curried()), a), b), c), d), f), g), h), i);
+    }
+
+    /**
+     * Combine 9 independent validations, accumulating all errors in input order.
+     *
+     * <p>Input validations are already evaluated. Errors combine left to right,
+     * with no identity or commutativity requirement. The mapper runs exactly
+     * once only when all inputs are Valid; errors from callbacks propagate.
+     *
+     * @param <A> successful value type of argument 1
+     * @param <B> successful value type of argument 2
+     * @param <C> successful value type of argument 3
+     * @param <D> successful value type of argument 4
+     * @param <F> successful value type of argument 5
+     * @param <G> successful value type of argument 6
+     * @param <H> successful value type of argument 7
+     * @param <I> successful value type of argument 8
+     * @param <J> successful value type of argument 9
+     * @param <R> mapped result type
+     * @param a independent validation 1
+     * @param b independent validation 2
+     * @param c independent validation 3
+     * @param d independent validation 4
+     * @param f independent validation 5
+     * @param g independent validation 6
+     * @param h independent validation 7
+     * @param i independent validation 8
+     * @param j independent validation 9
+     * @param mapper function applied when all arguments are valid
+     * @return a mapped successful value, or accumulated errors
+     */
+    public <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, F extends @Nullable Object, G extends @Nullable Object, H extends @Nullable Object, I extends @Nullable Object, J extends @Nullable Object, R extends @Nullable Object> Validation<E, R> map9(
+            @NonNull Validation<E, A> a,
+            @NonNull Validation<E, B> b,
+            @NonNull Validation<E, C> c,
+            @NonNull Validation<E, D> d,
+            @NonNull Validation<E, F> f,
+            @NonNull Validation<E, G> g,
+            @NonNull Validation<E, H> h,
+            @NonNull Validation<E, I> i,
+            @NonNull Validation<E, J> j,
+            @NonNull F9<? super A, ? super B, ? super C, ? super D, ? super F, ? super G, ? super H, ? super I, ? super J, ? extends R> mapper) {
+        return ap(ap(ap(ap(ap(ap(ap(ap(ap(pure(mapper.curried()), a), b), c), d), f), g), h), i), j);
+    }
+
+    /**
+     * Combine 10 independent validations, accumulating all errors in input order.
+     *
+     * <p>Input validations are already evaluated. Errors combine left to right,
+     * with no identity or commutativity requirement. The mapper runs exactly
+     * once only when all inputs are Valid; errors from callbacks propagate.
+     *
+     * @param <A> successful value type of argument 1
+     * @param <B> successful value type of argument 2
+     * @param <C> successful value type of argument 3
+     * @param <D> successful value type of argument 4
+     * @param <F> successful value type of argument 5
+     * @param <G> successful value type of argument 6
+     * @param <H> successful value type of argument 7
+     * @param <I> successful value type of argument 8
+     * @param <J> successful value type of argument 9
+     * @param <K> successful value type of argument 10
+     * @param <R> mapped result type
+     * @param a independent validation 1
+     * @param b independent validation 2
+     * @param c independent validation 3
+     * @param d independent validation 4
+     * @param f independent validation 5
+     * @param g independent validation 6
+     * @param h independent validation 7
+     * @param i independent validation 8
+     * @param j independent validation 9
+     * @param k independent validation 10
+     * @param mapper function applied when all arguments are valid
+     * @return a mapped successful value, or accumulated errors
+     */
+    public <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, F extends @Nullable Object, G extends @Nullable Object, H extends @Nullable Object, I extends @Nullable Object, J extends @Nullable Object, K extends @Nullable Object, R extends @Nullable Object> Validation<E, R> map10(
+            @NonNull Validation<E, A> a,
+            @NonNull Validation<E, B> b,
+            @NonNull Validation<E, C> c,
+            @NonNull Validation<E, D> d,
+            @NonNull Validation<E, F> f,
+            @NonNull Validation<E, G> g,
+            @NonNull Validation<E, H> h,
+            @NonNull Validation<E, I> i,
+            @NonNull Validation<E, J> j,
+            @NonNull Validation<E, K> k,
+            @NonNull F10<? super A, ? super B, ? super C, ? super D, ? super F, ? super G, ? super H, ? super I, ? super J, ? super K, ? extends R> mapper) {
+        return ap(ap(ap(ap(ap(ap(ap(ap(ap(ap(pure(mapper.curried()), a), b), c), d), f), g), h), i), j), k);
+    }
+
+    // END generated map3-map10
 }
