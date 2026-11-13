@@ -8,7 +8,7 @@
 
 - **Opt in, don't buy in.** Each abstraction should be useful independently and interoperate with ordinary Java code.
 - **Standard Java at the boundary.** Prefer JDK `Function`, `BiFunction`, `List`, `Map`, `Optional`, `CompletionStage`, `Flow`, records and sealed types where they suffice.
-- **Minimal implementation dependencies.** Guava immutable collections, Lombok and JSpecify are our approved foundations. Do not require clients to use Guava types or install Lombok simply to consume the library. JSpecify annotations describe nullness contracts without requiring callers to adopt a framework.
+- **Audited, deliberate dependencies.** JSpecify defines static nullness contracts; Lombok generates structural checks when Hercules is built, not when clients compile. Guava is retained for the planned morphism `Tree`/`Layer` API (#14), which uses `ImmutableList`, although current production sources have no Guava imports. See the [dependency policy](docs/dependencies.md).
 - **Prefer algebraic laws to ceremony.** Add examples, tests and clear semantics. Do not manufacture a full typeclass hierarchy or duplicate JDK reduction APIs without a practical reason.
 - **Functional, not dogmatic.** Explicit state, immutable data and composition are goals; existing Java programs remain first-class citizens.
 - **Pure core, interpreted effects.** Describe logging and other effects as data; perform I/O only at explicit interpretation boundaries.
@@ -44,7 +44,7 @@ io.github.blackbeltbadger:hercules:0.1.0-SNAPSHOT
 
 **Java API namespace:** `bbb.hercules` (imports such as `bbb.hercules.Either` and `bbb.hercules.Validation`). The shorter BBB Java package name is intentionally independent of the unchanged Maven groupId. This pre-release package migration requires consumers of earlier snapshots to update their Java imports; it changes binary names and does not ship compatibility wrappers.
 
-The project is a **library JAR**, not an executable application. Its production dependencies are Guava, JSpecify annotations, and compile-time-only Lombok. Tests use JUnit 5 and **Instancio** (test scope only) for randomized, reproducible law tests.
+The project is a **thin library JAR**, not an executable application. Guava and JSpecify are compile-scope dependencies for Maven consumers; Lombok is provided/annotation-processing only. Guava is intentionally reserved for the public `ImmutableList` morphism model (#14), not used by the current production code. JUnit 5 and **Instancio** are test-only. The [dependency policy](docs/dependencies.md) documents scopes and a standalone consumer smoke test.
 
 ```bash
 ./mvnw -B -ntp verify

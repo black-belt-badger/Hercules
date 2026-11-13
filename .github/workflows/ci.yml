@@ -27,3 +27,5 @@ jobs:
         run: ./mvnw -B -ntp verify
       - name: Prove JSpecify contracts fail compilation when violated
         run: ./scripts/verify-nullness.sh
+      - name: Verify consumer dependency scopes and thin JAR
+        run: ./scripts/verify-consumer-deps.sh
