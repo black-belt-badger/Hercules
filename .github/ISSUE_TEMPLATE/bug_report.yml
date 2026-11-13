@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible Hercules defect or build failure.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please provide a minimal reproduction. Never post credentials or private data.
+        Security vulnerabilities should be reported privately.
+  - type: textarea
+    id: actual
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Minimal reproduction
+      description: Java 17 snippet or Maven command with synthetic data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Hercules version/commit, JDK, Maven, operating system

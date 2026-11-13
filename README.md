@@ -47,4 +47,4 @@ Scaffold initialized. No functional abstractions or published release yet.
 
 ## License
 
-License selection is pending. Public repository visibility alone is not a software license.
+Hercules is released under the [BSD-3-Clause License](LICENSE).
