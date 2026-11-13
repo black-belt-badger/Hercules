@@ -123,6 +123,72 @@ cancel work. They only combine their completed `Validation` arguments.
 For parallel asynchronous checks and cancellation, see the later
 `CompletionStage` work in #9.
 
+## Sequence and traverse — many independent validations
+
+`sequence` collects an iterable of already computed validations into
+one validation of an **immutable, ordered list**:
+
+```java
+Validation<List<String>, List<Integer>> result = app.sequence(List.of(
+        Validation.valid(42),
+        Validation.invalid(List.of("quantity invalid")),
+        Validation.invalid(List.of("price invalid"))));
+// Invalid(["quantity invalid", "price invalid"])
+```
+
+`traverse` is its mapping counterpart: given an iterable of source
+values, apply a validation-producing function **once to each element**
+in encounter order, and then accumulate all errors.
+
+```java
+Validation<List<String>, Integer> checkPositive(int n) {
+    return n > 0
+            ? Validation.valid(n)
+            : Validation.invalid(List.of("must be positive: " + n));
+}
+
+Validation<List<String>, List<Integer>> checked =
+        app.traverse(List.of(3, -1, -2, 5), this::checkPositive);
+// Invalid(["must be positive: -1", "must be positive: -2"])
+```
+
+The callback and iterable references are validated at method entry.
+Each element is visited **even after any number of Invalid results**.
+A null validation *container* (including a null value returned by the
+mapper) throws `NullPointerException` when encountered. Input values
+can be null if the input type is explicitly `@Nullable`. A successful
+nullable output value remains an entry in the result list; it is not
+mistaken for an error or removed.
+
+Both operations follow the same policy:
+
+| Input cases | Result |
+| --- | --- |
+| Empty iterable | `Valid([])` |
+| Every element valid | `Valid(unmodifiable ordered snapshot)` |
+| One invalid | `Invalid(that error)` |
+| Several invalid | `Invalid(combineErrors(...))`, encounter order |
+
+The combined error type requires **associativity** but no identity.
+The returned list cannot be modified through its public API, and it
+does not change if the input iterable is later modified. Stored element
+objects and error payloads are not defensively deep-copied.
+
+`traverse` does **not** eagerly schedule checks before it begins
+iteration or run them in parallel. It executes each mapper synchronously
+while traversing once. It does **not** catch or accumulate Java
+exceptions: exceptions from iterators, mappers, or the error combiner
+propagate immediately. Consequently, accumulation is guaranteed only
+for validations that are actually returned; a thrown exception
+terminates the operation. Both APIs assume a **finite** iterable, and
+perform a linear number of steps; an infinite iterable does not
+terminate.
+
+These operations use JDK `Iterable`, `Function` and `List`, with
+no new typeclass hierarchy. `sequence` is equivalent to traversing
+the validation objects with `Function.identity()`; `traverse(xs,
+Validation::valid)` yields a valid list of the original values.
+
 ## Nullness and mutability
 
 The package uses JSpecify `@NullMarked`. If an application explicitly
@@ -151,10 +217,10 @@ rather than the independent accumulation that distinguishes this type.
 Hercules therefore leaves `flatMap` out of this increment instead of
 promising incompatible algebraic laws.
 
-Likewise, `mapN`, `sequence`, `traverse` and asynchronous
-`CompletionStage` combinations are future, separately reviewed #9
-subtasks. Those semantics will specify evaluation order and cancellation
-where relevant.
+Arity-aware `mapN` and asynchronous `CompletionStage`
+combinations remain separately reviewed #9 subtasks; concurrent
+composition must state ordering, exception and cancellation semantics
+explicitly.
 
 ## Verification
 
@@ -165,12 +231,16 @@ valid combinations, accumulation order, strict invocation, null
 contracts and exception propagation.
 
 `ValidationExamplesTest` demonstrates form fields and curried
-constructors. `ValidationPublicApiTest` compiles and runs from an
-independent Java package.
+constructors. `ValidationTraversalLawsTest` and
+`ValidationTraversalBehaviorTest` check ordered accumulation, mapping
+coherence, empty/singleton cases, no short-circuiting, null contracts,
+single traversal, immutable results and error propagation.
+`ValidationPublicApiTest` and `ValidationTraversalPublicApiTest`
+compile and run from an independent Java package.
 
 ```bash
 ./mvnw -B -ntp clean verify
 ```
 
 Java 17 is the baseline; CI also verifies Java 21 and Java 25.
-Parent: #9. Initial subtask: #39.
+Parent: #9. Accumulating Applicative: #39; sequence/traverse: #54.
