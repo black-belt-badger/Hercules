@@ -1,10 +1,10 @@
-# Those<A,B,E>: evidence and informative absence
+# Those<L,R,E>: evidence and informative absence
 
-`Those<A,B,E>` extends the semantics of Hercules `These<L,R>` with a
+`Those<L,R,E>` extends the semantics of Hercules `These<L,R>` with a
 **fourth case**, `Neither(E)`. Its type parameters are:
 
-- `A`: left evidence or observation
-- `B`: right evidence or observation
+- `L`: left evidence or observation
+- `R`: right evidence or observation
 - `E`: the explanation why **neither** observation is available
 
 Neither does not automatically mean an exception, error, false, or monoidal
@@ -21,20 +21,20 @@ Those<String, Integer, String> none = Those.neither("not observed yet");  // Nei
 ```
 
 All four are nested immutable Java records in a sealed Java 17 interface:
-`This(A)`, `That(B)`, `Both(A,B)`, and `Neither(E)`. Like other
+`This(L)`, `That(R)`, `Both(L,R)`, and `Neither(E)`. Like other
 records, they are shallowly immutable; referenced mutable payloads are
 not deep-copied.
 
 ## Consistent with These
 
-| Method | This(A) | That(B) | Both(A,B) | Neither(E) |
+| Method | This(L) | That(R) | Both(L,R) | Neither(E) |
 | --- | --- | --- | --- | --- |
-| `map(f)` | This(A) | That(f(B)) | Both(A,f(B)) | Neither(E) |
-| `mapLeft(f)` | This(f(A)) | That(B) | Both(f(A),B) | Neither(E) |
-| `mapNeither(f)` | This(A) | That(B) | Both(A,B) | Neither(f(E)) |
-| `bimap(f,g)` | This(f(A)) | That(g(B)) | Both(f(A),g(B)) | Neither(E) |
-| `trimap(f,g,h)` | This(f(A)) | That(g(B)) | Both(f(A),g(B)) | Neither(h(E)) |
-| `swap()` | That(A) | This(B) | Both(B,A) | Neither(E) |
+| `map(f)` | This(L) | That(f(R)) | Both(L,f(R)) | Neither(E) |
+| `mapLeft(f)` | This(f(L)) | That(R) | Both(f(L),R) | Neither(E) |
+| `mapNeither(f)` | This(L) | That(R) | Both(L,R) | Neither(f(E)) |
+| `bimap(f,g)` | This(f(L)) | That(g(R)) | Both(f(L),g(R)) | Neither(E) |
+| `trimap(f,g,h)` | This(f(L)) | That(g(R)) | Both(f(L),g(R)) | Neither(h(E)) |
+| `swap()` | That(L) | This(R) | Both(R,L) | Neither(E) |
 
 `map` is right-biased for naming consistency with `Either` and
 `These`, but that does **not** classify `This` or `Neither` as errors.
@@ -61,7 +61,7 @@ a missing variant**.
 The constructors form the following structural equivalence:
 
 ```text
-Those<A,B,E>  ≅  Either<E, These<A,B>>
+Those<L,R,E>  ≅  Either<E, These<L,R>>
 
 Neither(e)    ↔ Left(e)
 This(a)       ↔ Right(This(a))
@@ -119,7 +119,7 @@ We intentionally add **no** `Alternative`, `empty`, `flatMap`,
 `combine`, `zip`, or `toOptional` method in this subtask.
 Aggregation and optional/lossy conversions remain subjects for
 issues #5, #9 and #27. For applications needing E information alongside
-evidence, consider a richer record or `These<E, These<A,B>>`,
+evidence, consider a richer record or `These<E, These<L,R>>`,
 rather than discarding E.
 
 ## Validation

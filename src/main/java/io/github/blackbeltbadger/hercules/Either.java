@@ -24,21 +24,46 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
     /**
      * Eliminate the choice by handling both variants.
      * Both handlers are required, even though only one is invoked.
+     *
+     * @param <T> result type
+     * @param onLeft handler for the left-only variant
+     * @param onRight handler for the right-only variant
+     * @return the result of the handler for the present variant
      */
     <T> T fold(Function<? super L, ? extends T> onLeft,
                Function<? super R, ? extends T> onRight);
 
-    /** Construct a left value. */
+    /**
+     * Construct a left value.
+     *
+     * @param <L> left payload type
+     * @param <R> right payload type
+     * @param value value to wrap in the selected variant
+     * @return a left-only value
+     */
     static <L, R> Either<L, R> left(L value) {
         return new Left<>(value);
     }
 
-    /** Construct a right value. */
+    /**
+     * Construct a right value.
+     *
+     * @param <L> left payload type
+     * @param <R> right payload type
+     * @param value value to wrap in the selected variant
+     * @return a right-only value
+     */
     static <L, R> Either<L, R> right(R value) {
         return new Right<>(value);
     }
 
-    /** Transform only the right value (right-biased functor mapping). */
+    /**
+     * Transform only the right value (right-biased functor mapping).
+     *
+     * @param <T> result type
+     * @param mapper payload mapping function; must not be null
+     * @return a value with the right payload transformed if present
+     */
     default <T> Either<L, T> map(Function<? super R, ? extends T> mapper) {
         Objects.requireNonNull(mapper, "mapper");
         return fold(
@@ -46,7 +71,13 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
                 right -> Either.<L, T>right(mapper.apply(right)));
     }
 
-    /** Transform only the left value. */
+    /**
+     * Transform only the left value.
+     *
+     * @param <T> result type
+     * @param mapper payload mapping function; must not be null
+     * @return a value with the left payload transformed if present
+     */
     default <T> Either<T, R> mapLeft(Function<? super L, ? extends T> mapper) {
         Objects.requireNonNull(mapper, "mapper");
         return fold(
@@ -54,7 +85,15 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
                 right -> Either.<T, R>right(right));
     }
 
-    /** Transform both sides, invoking only the callback for the present variant. */
+    /**
+     * Transform both sides, invoking only the callback for the present variant.
+     *
+     * @param <A> transformed left payload type
+     * @param <B> transformed right payload type
+     * @param leftMapper mapping function for left values; must not be null
+     * @param rightMapper mapping function for right values; must not be null
+     * @return a value with whichever evidence payloads are present transformed
+     */
     default <A, B> Either<A, B> bimap(Function<? super L, ? extends A> leftMapper,
                                      Function<? super R, ? extends B> rightMapper) {
         Objects.requireNonNull(leftMapper, "leftMapper");
@@ -67,6 +106,10 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
     /**
      * Chain a computation on the right; propagate left values unchanged.
      * A callback that returns a null Either is rejected on evaluation.
+     *
+     * @param <T> result type
+     * @param binder right-biased dependent function; must not be null
+     * @return the result of dependent right-biased computation
      */
     default <T> Either<L, T> flatMap(Function<? super R, ? extends Either<L, T>> binder) {
         Objects.requireNonNull(binder, "binder");
@@ -75,7 +118,11 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
                 right -> Objects.requireNonNull(binder.apply(right), "flatMap returned null"));
     }
 
-    /** Reverse the two alternatives. Applying twice restores the original value. */
+    /**
+     * Reverse the two alternatives. Applying twice restores the original value.
+     *
+     * @return the value with left and right alternatives exchanged
+     */
     default Either<R, L> swap() {
         return fold(Either::right, Either::left);
     }
@@ -91,12 +138,22 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
         return fold(These::left, These::right);
     }
 
-    /** Return the right value, or the supplied fallback if left. */
+    /**
+     * Return the right value, or the supplied fallback if left.
+     *
+     * @param fallback replacement value for a left variant
+     * @return the right value if present, otherwise the fallback
+     */
     default R getOrElse(R fallback) {
         return fold(left -> fallback, Function.identity());
     }
 
-    /** Convert a left value into a right value by applying a recovery function. */
+    /**
+     * Convert a left value into a right value by applying a recovery function.
+     *
+     * @param recovery function converting a left value to a right value
+     * @return the original right value or the recovered right value
+     */
     default Either<L, R> recover(Function<? super L, ? extends R> recovery) {
         Objects.requireNonNull(recovery, "recovery");
         return fold(
@@ -107,12 +164,20 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
     /**
      * Keep the right value if present, discarding the left value.
      * A nullable Right payload also becomes Optional.empty().
+     *
+     * @return an Optional containing the right value when non-null
      */
     default Optional<R> toOptional() {
         return fold(left -> Optional.empty(), Optional::ofNullable);
     }
 
-    /** The left alternative. Its payload is not implicitly an error. */
+    /**
+     * The left alternative. Its payload is not implicitly an error.
+     *
+     * @param <L> left payload type
+     * @param <R> right payload type
+     * @param value value to wrap in the selected variant
+     */
     record Left<L, R>(L value) implements Either<L, R> {
 
         @Override
@@ -124,7 +189,13 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
         }
     }
 
-    /** The right alternative. */
+    /**
+     * The right alternative.
+     *
+     * @param <L> left payload type
+     * @param <R> right payload type
+     * @param value value to wrap in the selected variant
+     */
     record Right<L, R>(R value) implements Either<L, R> {
 
         @Override

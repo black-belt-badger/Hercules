@@ -11,19 +11,44 @@ import java.util.function.Function;
  * <p>Transformations are lazy. Non-null callbacks are checked at composition
  * time; inputs and results follow JSpecify type-use nullness contracts.
  * User exceptions are propagated unchanged.
+ *
+ * @param <A> argument 1 type
+ * @param <B> argument 2 type
+ * @param <C> argument 3 type
+ * @param <R> result type
  */
 @FunctionalInterface
 public interface F3<A, B, C, R> {
 
+    /**
+     * Evaluate the function using all arguments.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @param c argument 3
+     * @return the computed result
+     */
     R apply(A a, B b, C c);
 
-    /** Transform the result without evaluating the original function. */
+    /**
+     * Transform the result without evaluating the original function.
+     *
+     * @param <S> new result type
+     * @param mapper result transformation, required at composition time
+     * @return a lazily mapped function
+     */
     default <S> F3<A, B, C, S> map(Function<? super R, ? extends S> mapper) {
         Objects.requireNonNull(mapper, "mapper");
         return (a, b, c) -> mapper.apply(apply(a, b, c));
     }
 
-    /** Reader-style bind; both functions receive the same arguments. */
+    /**
+     * Reader-style bind; both functions receive the same arguments.
+     *
+     * @param <S> new result type
+     * @param binder maps a result to another function with the same inputs
+     * @return a lazily composed function
+     */
     default <S> F3<A, B, C, S> flatMap(
             Function<? super R, ? extends F3<A, B, C, S>> binder) {
         Objects.requireNonNull(binder, "binder");
@@ -31,43 +56,85 @@ public interface F3<A, B, C, R> {
                 "flatMap returned a null function").apply(a, b, c);
     }
 
-    /** Bind the first 1 argument; evaluation is lazy. */
+    /**
+     * Bind the first argument; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @return a function accepting the remaining 2 arguments
+     */
     default BiFunction<B, C, R> partial(A a) {
         return (b, c) -> apply(a, b, c);
     }
 
-    /** Bind the first 2 arguments; evaluation is lazy. */
+    /**
+     * Bind the first 2 arguments; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @return a function accepting the remaining argument
+     */
     default Function<C, R> partial(A a, B b) {
         return (c) -> apply(a, b, c);
     }
 
-    /** Transform argument 1 prior to evaluation. */
+    /**
+     * Transform argument 1 prior to evaluation.
+     *
+     * @param <Z> new type of argument 1
+     * @param before transformation to the original argument 1 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F3<Z, B, C, R> compose1(
             Function<? super Z, ? extends A> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c) -> apply(before.apply(a), b, c);
     }
 
-    /** Transform argument 2 prior to evaluation. */
+    /**
+     * Transform argument 2 prior to evaluation.
+     *
+     * @param <Z> new type of argument 2
+     * @param before transformation to the original argument 2 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F3<A, Z, C, R> compose2(
             Function<? super Z, ? extends B> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c) -> apply(a, before.apply(b), c);
     }
 
-    /** Transform argument 3 prior to evaluation. */
+    /**
+     * Transform argument 3 prior to evaluation.
+     *
+     * @param <Z> new type of argument 3
+     * @param before transformation to the original argument 3 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F3<A, B, Z, R> compose3(
             Function<? super Z, ? extends C> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c) -> apply(a, b, before.apply(c));
     }
 
-    /** Fully curry this function into nested JDK Function values. */
+    /**
+     * Fully curry this function into nested JDK Function values.
+     *
+     * @return a curried function, evaluated when all arguments are supplied
+     */
     default Function<A, Function<B, Function<C, R>>> curried() {
         return a -> b -> c -> apply(a, b, c);
     }
 
-    /** Uncurry nested JDK Function values. */
+    /**
+     * Uncurry nested JDK Function values.
+     *
+     * @param <A> argument 1 type
+     * @param <B> argument 2 type
+     * @param <C> argument 3 type
+     * @param <R> result type
+     * @param function a curried function accepting all arguments
+     * @return an uncurried multi-argument function
+     */
     static <A, B, C, R> F3<A, B, C, R> uncurry(Function<A, Function<B, Function<C, R>>> function) {
         Objects.requireNonNull(function, "function");
         return (a, b, c) -> function.apply(a).apply(b).apply(c);

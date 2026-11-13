@@ -2,7 +2,7 @@
 
 `These<L,R>` represents the **inclusive-or** of two types: left only,
 right only, or both together. It differs from `Either<L,R>`, which stores
-exactly one side, and from planned `Those<A,B,E>`, which can additionally
+exactly one side, and from `Those<L,R,E>`, which can additionally
 record a typed explanation for neither side being present.
 
 ## Constructors and variants
@@ -121,7 +121,7 @@ would otherwise silently discard information.
 
 `zip`, `mapN`, `Alternative`, and general error accumulation remain
 part of #9 / #5 discussions, not obligations of this type. The separate
-`Those<A,B,E>` experiment will investigate informative `Neither(E)`.
+`Those<L,R,E>` supports informative `Neither(E)`.
 
 ## Verification
 

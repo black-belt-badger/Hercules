@@ -11,19 +11,52 @@ import java.util.function.Function;
  * <p>Transformations are lazy. Non-null callbacks are checked at composition
  * time; inputs and results follow JSpecify type-use nullness contracts.
  * User exceptions are propagated unchanged.
+ *
+ * @param <A> argument 1 type
+ * @param <B> argument 2 type
+ * @param <C> argument 3 type
+ * @param <D> argument 4 type
+ * @param <E> argument 5 type
+ * @param <F> argument 6 type
+ * @param <G> argument 7 type
+ * @param <R> result type
  */
 @FunctionalInterface
 public interface F7<A, B, C, D, E, F, G, R> {
 
+    /**
+     * Evaluate the function using all arguments.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @param c argument 3
+     * @param d argument 4
+     * @param e argument 5
+     * @param f argument 6
+     * @param g argument 7
+     * @return the computed result
+     */
     R apply(A a, B b, C c, D d, E e, F f, G g);
 
-    /** Transform the result without evaluating the original function. */
+    /**
+     * Transform the result without evaluating the original function.
+     *
+     * @param <S> new result type
+     * @param mapper result transformation, required at composition time
+     * @return a lazily mapped function
+     */
     default <S> F7<A, B, C, D, E, F, G, S> map(Function<? super R, ? extends S> mapper) {
         Objects.requireNonNull(mapper, "mapper");
         return (a, b, c, d, e, f, g) -> mapper.apply(apply(a, b, c, d, e, f, g));
     }
 
-    /** Reader-style bind; both functions receive the same arguments. */
+    /**
+     * Reader-style bind; both functions receive the same arguments.
+     *
+     * @param <S> new result type
+     * @param binder maps a result to another function with the same inputs
+     * @return a lazily composed function
+     */
     default <S> F7<A, B, C, D, E, F, G, S> flatMap(
             Function<? super R, ? extends F7<A, B, C, D, E, F, G, S>> binder) {
         Objects.requireNonNull(binder, "binder");
@@ -31,91 +64,195 @@ public interface F7<A, B, C, D, E, F, G, R> {
                 "flatMap returned a null function").apply(a, b, c, d, e, f, g);
     }
 
-    /** Bind the first 1 argument; evaluation is lazy. */
+    /**
+     * Bind the first argument; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @return a function accepting the remaining 6 arguments
+     */
     default F6<B, C, D, E, F, G, R> partial(A a) {
         return (b, c, d, e, f, g) -> apply(a, b, c, d, e, f, g);
     }
 
-    /** Bind the first 2 arguments; evaluation is lazy. */
+    /**
+     * Bind the first 2 arguments; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @return a function accepting the remaining 5 arguments
+     */
     default F5<C, D, E, F, G, R> partial(A a, B b) {
         return (c, d, e, f, g) -> apply(a, b, c, d, e, f, g);
     }
 
-    /** Bind the first 3 arguments; evaluation is lazy. */
+    /**
+     * Bind the first 3 arguments; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @param c argument 3
+     * @return a function accepting the remaining 4 arguments
+     */
     default F4<D, E, F, G, R> partial(A a, B b, C c) {
         return (d, e, f, g) -> apply(a, b, c, d, e, f, g);
     }
 
-    /** Bind the first 4 arguments; evaluation is lazy. */
+    /**
+     * Bind the first 4 arguments; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @param c argument 3
+     * @param d argument 4
+     * @return a function accepting the remaining 3 arguments
+     */
     default F3<E, F, G, R> partial(A a, B b, C c, D d) {
         return (e, f, g) -> apply(a, b, c, d, e, f, g);
     }
 
-    /** Bind the first 5 arguments; evaluation is lazy. */
+    /**
+     * Bind the first 5 arguments; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @param c argument 3
+     * @param d argument 4
+     * @param e argument 5
+     * @return a function accepting the remaining 2 arguments
+     */
     default BiFunction<F, G, R> partial(A a, B b, C c, D d, E e) {
         return (f, g) -> apply(a, b, c, d, e, f, g);
     }
 
-    /** Bind the first 6 arguments; evaluation is lazy. */
+    /**
+     * Bind the first 6 arguments; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @param c argument 3
+     * @param d argument 4
+     * @param e argument 5
+     * @param f argument 6
+     * @return a function accepting the remaining argument
+     */
     default Function<G, R> partial(A a, B b, C c, D d, E e, F f) {
         return (g) -> apply(a, b, c, d, e, f, g);
     }
 
-    /** Transform argument 1 prior to evaluation. */
+    /**
+     * Transform argument 1 prior to evaluation.
+     *
+     * @param <Z> new type of argument 1
+     * @param before transformation to the original argument 1 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F7<Z, B, C, D, E, F, G, R> compose1(
             Function<? super Z, ? extends A> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d, e, f, g) -> apply(before.apply(a), b, c, d, e, f, g);
     }
 
-    /** Transform argument 2 prior to evaluation. */
+    /**
+     * Transform argument 2 prior to evaluation.
+     *
+     * @param <Z> new type of argument 2
+     * @param before transformation to the original argument 2 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F7<A, Z, C, D, E, F, G, R> compose2(
             Function<? super Z, ? extends B> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d, e, f, g) -> apply(a, before.apply(b), c, d, e, f, g);
     }
 
-    /** Transform argument 3 prior to evaluation. */
+    /**
+     * Transform argument 3 prior to evaluation.
+     *
+     * @param <Z> new type of argument 3
+     * @param before transformation to the original argument 3 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F7<A, B, Z, D, E, F, G, R> compose3(
             Function<? super Z, ? extends C> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d, e, f, g) -> apply(a, b, before.apply(c), d, e, f, g);
     }
 
-    /** Transform argument 4 prior to evaluation. */
+    /**
+     * Transform argument 4 prior to evaluation.
+     *
+     * @param <Z> new type of argument 4
+     * @param before transformation to the original argument 4 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F7<A, B, C, Z, E, F, G, R> compose4(
             Function<? super Z, ? extends D> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d, e, f, g) -> apply(a, b, c, before.apply(d), e, f, g);
     }
 
-    /** Transform argument 5 prior to evaluation. */
+    /**
+     * Transform argument 5 prior to evaluation.
+     *
+     * @param <Z> new type of argument 5
+     * @param before transformation to the original argument 5 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F7<A, B, C, D, Z, F, G, R> compose5(
             Function<? super Z, ? extends E> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d, e, f, g) -> apply(a, b, c, d, before.apply(e), f, g);
     }
 
-    /** Transform argument 6 prior to evaluation. */
+    /**
+     * Transform argument 6 prior to evaluation.
+     *
+     * @param <Z> new type of argument 6
+     * @param before transformation to the original argument 6 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F7<A, B, C, D, E, Z, G, R> compose6(
             Function<? super Z, ? extends F> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d, e, f, g) -> apply(a, b, c, d, e, before.apply(f), g);
     }
 
-    /** Transform argument 7 prior to evaluation. */
+    /**
+     * Transform argument 7 prior to evaluation.
+     *
+     * @param <Z> new type of argument 7
+     * @param before transformation to the original argument 7 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F7<A, B, C, D, E, F, Z, R> compose7(
             Function<? super Z, ? extends G> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d, e, f, g) -> apply(a, b, c, d, e, f, before.apply(g));
     }
 
-    /** Fully curry this function into nested JDK Function values. */
+    /**
+     * Fully curry this function into nested JDK Function values.
+     *
+     * @return a curried function, evaluated when all arguments are supplied
+     */
     default Function<A, Function<B, Function<C, Function<D, Function<E, Function<F, Function<G, R>>>>>>> curried() {
         return a -> b -> c -> d -> e -> f -> g -> apply(a, b, c, d, e, f, g);
     }
 
-    /** Uncurry nested JDK Function values. */
+    /**
+     * Uncurry nested JDK Function values.
+     *
+     * @param <A> argument 1 type
+     * @param <B> argument 2 type
+     * @param <C> argument 3 type
+     * @param <D> argument 4 type
+     * @param <E> argument 5 type
+     * @param <F> argument 6 type
+     * @param <G> argument 7 type
+     * @param <R> result type
+     * @param function a curried function accepting all arguments
+     * @return an uncurried multi-argument function
+     */
     static <A, B, C, D, E, F, G, R> F7<A, B, C, D, E, F, G, R> uncurry(Function<A, Function<B, Function<C, Function<D, Function<E, Function<F, Function<G, R>>>>>>> function) {
         Objects.requireNonNull(function, "function");
         return (a, b, c, d, e, f, g) -> function.apply(a).apply(b).apply(c).apply(d).apply(e).apply(f).apply(g);

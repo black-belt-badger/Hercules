@@ -11,19 +11,46 @@ import java.util.function.Function;
  * <p>Transformations are lazy. Non-null callbacks are checked at composition
  * time; inputs and results follow JSpecify type-use nullness contracts.
  * User exceptions are propagated unchanged.
+ *
+ * @param <A> argument 1 type
+ * @param <B> argument 2 type
+ * @param <C> argument 3 type
+ * @param <D> argument 4 type
+ * @param <R> result type
  */
 @FunctionalInterface
 public interface F4<A, B, C, D, R> {
 
+    /**
+     * Evaluate the function using all arguments.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @param c argument 3
+     * @param d argument 4
+     * @return the computed result
+     */
     R apply(A a, B b, C c, D d);
 
-    /** Transform the result without evaluating the original function. */
+    /**
+     * Transform the result without evaluating the original function.
+     *
+     * @param <S> new result type
+     * @param mapper result transformation, required at composition time
+     * @return a lazily mapped function
+     */
     default <S> F4<A, B, C, D, S> map(Function<? super R, ? extends S> mapper) {
         Objects.requireNonNull(mapper, "mapper");
         return (a, b, c, d) -> mapper.apply(apply(a, b, c, d));
     }
 
-    /** Reader-style bind; both functions receive the same arguments. */
+    /**
+     * Reader-style bind; both functions receive the same arguments.
+     *
+     * @param <S> new result type
+     * @param binder maps a result to another function with the same inputs
+     * @return a lazily composed function
+     */
     default <S> F4<A, B, C, D, S> flatMap(
             Function<? super R, ? extends F4<A, B, C, D, S>> binder) {
         Objects.requireNonNull(binder, "binder");
@@ -31,55 +58,111 @@ public interface F4<A, B, C, D, R> {
                 "flatMap returned a null function").apply(a, b, c, d);
     }
 
-    /** Bind the first 1 argument; evaluation is lazy. */
+    /**
+     * Bind the first argument; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @return a function accepting the remaining 3 arguments
+     */
     default F3<B, C, D, R> partial(A a) {
         return (b, c, d) -> apply(a, b, c, d);
     }
 
-    /** Bind the first 2 arguments; evaluation is lazy. */
+    /**
+     * Bind the first 2 arguments; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @return a function accepting the remaining 2 arguments
+     */
     default BiFunction<C, D, R> partial(A a, B b) {
         return (c, d) -> apply(a, b, c, d);
     }
 
-    /** Bind the first 3 arguments; evaluation is lazy. */
+    /**
+     * Bind the first 3 arguments; evaluation is lazy.
+     *
+     * @param a argument 1
+     * @param b argument 2
+     * @param c argument 3
+     * @return a function accepting the remaining argument
+     */
     default Function<D, R> partial(A a, B b, C c) {
         return (d) -> apply(a, b, c, d);
     }
 
-    /** Transform argument 1 prior to evaluation. */
+    /**
+     * Transform argument 1 prior to evaluation.
+     *
+     * @param <Z> new type of argument 1
+     * @param before transformation to the original argument 1 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F4<Z, B, C, D, R> compose1(
             Function<? super Z, ? extends A> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d) -> apply(before.apply(a), b, c, d);
     }
 
-    /** Transform argument 2 prior to evaluation. */
+    /**
+     * Transform argument 2 prior to evaluation.
+     *
+     * @param <Z> new type of argument 2
+     * @param before transformation to the original argument 2 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F4<A, Z, C, D, R> compose2(
             Function<? super Z, ? extends B> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d) -> apply(a, before.apply(b), c, d);
     }
 
-    /** Transform argument 3 prior to evaluation. */
+    /**
+     * Transform argument 3 prior to evaluation.
+     *
+     * @param <Z> new type of argument 3
+     * @param before transformation to the original argument 3 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F4<A, B, Z, D, R> compose3(
             Function<? super Z, ? extends C> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d) -> apply(a, b, before.apply(c), d);
     }
 
-    /** Transform argument 4 prior to evaluation. */
+    /**
+     * Transform argument 4 prior to evaluation.
+     *
+     * @param <Z> new type of argument 4
+     * @param before transformation to the original argument 4 type
+     * @return a function accepting the transformed argument
+     */
     default <Z> F4<A, B, C, Z, R> compose4(
             Function<? super Z, ? extends D> before) {
         Objects.requireNonNull(before, "before");
         return (a, b, c, d) -> apply(a, b, c, before.apply(d));
     }
 
-    /** Fully curry this function into nested JDK Function values. */
+    /**
+     * Fully curry this function into nested JDK Function values.
+     *
+     * @return a curried function, evaluated when all arguments are supplied
+     */
     default Function<A, Function<B, Function<C, Function<D, R>>>> curried() {
         return a -> b -> c -> d -> apply(a, b, c, d);
     }
 
-    /** Uncurry nested JDK Function values. */
+    /**
+     * Uncurry nested JDK Function values.
+     *
+     * @param <A> argument 1 type
+     * @param <B> argument 2 type
+     * @param <C> argument 3 type
+     * @param <D> argument 4 type
+     * @param <R> result type
+     * @param function a curried function accepting all arguments
+     * @return an uncurried multi-argument function
+     */
     static <A, B, C, D, R> F4<A, B, C, D, R> uncurry(Function<A, Function<B, Function<C, Function<D, R>>>> function) {
         Objects.requireNonNull(function, "function");
         return (a, b, c, d) -> function.apply(a).apply(b).apply(c).apply(d);
