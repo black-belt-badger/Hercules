@@ -21,6 +21,7 @@
 - **Those**: four-way `Those<L,R,E>` with `This`, `That`, `Both`, and typed `Neither(E)` for informative absence. Maps all payloads and converts losslessly to `Either<E, These<A,B>>`. `ThoseShape` provides payload-free information ordering, while `ThoseAggregation` explicitly combines all three payload channels without discarding absence provenance. See the [Those guide](docs/those.md).
 - **Explicit choice**: `EitherChoice<L>` supports leftmost-success fallback and ordered accumulation of failed alternatives using a caller-provided identity and combiner. This is a concrete choice monoid, not a universal higher-kinded `Alternative`. See the [choice guide](docs/choice.md).
 - **Accumulating validation**: `Validation<E,A>` with `Valid`/`Invalid` and `ValidationApplicative<E>` for independent checks, lawful `pure`/`ap`/`map2`, ordered `sequence`/`traverse` for many checks, arity-aware `map3`–`map10` using `F3`–`F10`, and `CompletionStage` composition (`map2Stages`/`sequenceStages`) for independently supplied asynchronous checks. Normal validation failures accumulate; exceptional completion remains exceptional. See the [Validation guide](docs/validation.md).
+- **Persistent difference lists**: `DList<A>` with constant-time `cons`, `snoc` and `append`, immutable source snapshots and stack-safe iterative materialization into an unmodifiable JDK `List`. Includes a manual allocation/timing benchmark and diagnostic-accumulation example. See the [DList guide](docs/dlist.md).
 
 ## Areas under consideration
 
@@ -54,7 +55,7 @@ JSpecify `@NullMarked` is enabled for the initial package. **NullAway checks the
 
 ## Status
 
-`F3`–`F10`, `Either`, `These`, `Those`, `EitherChoice`, and accumulating `Validation` implemented. No published release yet.
+`F3`–`F10`, `Either`, `These`, `Those`, `EitherChoice`, accumulating `Validation`, and persistent `DList` implemented. No published release yet.
 
 ## License
 
