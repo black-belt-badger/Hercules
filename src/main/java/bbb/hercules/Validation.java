@@ -3,6 +3,7 @@ package bbb.hercules;
 import java.util.function.Function;
 
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A successful value or accumulated validation errors.
@@ -19,7 +20,7 @@ import lombok.NonNull;
  * @param <E> validation error payload type, often an immutable list
  * @param <A> successful value type
  */
-public sealed interface Validation<E, A>
+public sealed interface Validation<E extends @Nullable Object, A extends @Nullable Object>
         permits Validation.Invalid, Validation.Valid {
 
     /**
@@ -30,7 +31,7 @@ public sealed interface Validation<E, A>
      * @param onValid handler for a valid value
      * @return the result from the active case
      */
-    <R> R fold(@NonNull Function<? super E, ? extends R> onInvalid,
+    <R extends @Nullable Object> R fold(@NonNull Function<? super E, ? extends R> onInvalid,
                @NonNull Function<? super A, ? extends R> onValid);
 
     /**
@@ -41,7 +42,7 @@ public sealed interface Validation<E, A>
      * @param errors the error payload
      * @return an invalid validation
      */
-    static <E, A> Validation<E, A> invalid(E errors) {
+    static <E extends @Nullable Object, A extends @Nullable Object> Validation<E, A> invalid(E errors) {
         return new Invalid<>(errors);
     }
 
@@ -53,7 +54,7 @@ public sealed interface Validation<E, A>
      * @param value the successful payload
      * @return a valid validation
      */
-    static <E, A> Validation<E, A> valid(A value) {
+    static <E extends @Nullable Object, A extends @Nullable Object> Validation<E, A> valid(A value) {
         return new Valid<>(value);
     }
 
@@ -64,7 +65,7 @@ public sealed interface Validation<E, A>
      * @param mapper transformation applied only when valid
      * @return a mapped validation with the same case
      */
-    default <B> Validation<E, B> map(@NonNull Function<? super A, ? extends B> mapper) {
+    default <B extends @Nullable Object> Validation<E, B> map(@NonNull Function<? super A, ? extends B> mapper) {
         return fold(Validation::invalid, value -> Validation.valid(mapper.apply(value)));
     }
 
@@ -75,7 +76,7 @@ public sealed interface Validation<E, A>
      * @param mapper transformation applied only when invalid
      * @return a validation with transformed errors where present
      */
-    default <F> Validation<F, A> mapLeft(@NonNull Function<? super E, ? extends F> mapper) {
+    default <F extends @Nullable Object> Validation<F, A> mapLeft(@NonNull Function<? super E, ? extends F> mapper) {
         return fold(errors -> Validation.invalid(mapper.apply(errors)), Validation::valid);
     }
 
@@ -88,7 +89,7 @@ public sealed interface Validation<E, A>
      * @param valueMapper mapping function for valid results
      * @return a validation with the active payload transformed
      */
-    default <F, B> Validation<F, B> bimap(
+    default <F extends @Nullable Object, B extends @Nullable Object> Validation<F, B> bimap(
             @NonNull Function<? super E, ? extends F> errorMapper,
             @NonNull Function<? super A, ? extends B> valueMapper) {
         return fold(errors -> Validation.invalid(errorMapper.apply(errors)),
@@ -114,25 +115,37 @@ public sealed interface Validation<E, A>
      * @param source an Either to convert, not null
      * @return an equivalent invalid or valid value
      */
-    static <E, A> Validation<E, A> fromEither(@NonNull Either<E, A> source) {
+    static <E extends @Nullable Object, A extends @Nullable Object> Validation<E, A> fromEither(@NonNull Either<E, A> source) {
         return source.fold(Validation::invalid, Validation::valid);
     }
 
-    /** Validation errors; no successful value is retained. */
-    record Invalid<E, A>(E errors) implements Validation<E, A> {
+    /**
+     * Validation errors; no successful value is retained.
+     *
+     * @param <E> error payload type
+     * @param <A> successful value type
+     * @param errors accumulated validation errors
+     */
+    record Invalid<E extends @Nullable Object, A extends @Nullable Object>(E errors) implements Validation<E, A> {
 
         @Override
-        public <R> R fold(@NonNull Function<? super E, ? extends R> onInvalid,
+        public <R extends @Nullable Object> R fold(@NonNull Function<? super E, ? extends R> onInvalid,
                           @NonNull Function<? super A, ? extends R> onValid) {
             return onInvalid.apply(errors);
         }
     }
 
-    /** Successful validation; no errors are present. */
-    record Valid<E, A>(A value) implements Validation<E, A> {
+    /**
+     * Successful validation; no errors are present.
+     *
+     * @param <E> error payload type
+     * @param <A> successful value type
+     * @param value the valid payload
+     */
+    record Valid<E extends @Nullable Object, A extends @Nullable Object>(A value) implements Validation<E, A> {
 
         @Override
-        public <R> R fold(@NonNull Function<? super E, ? extends R> onInvalid,
+        public <R extends @Nullable Object> R fold(@NonNull Function<? super E, ? extends R> onInvalid,
                           @NonNull Function<? super A, ? extends R> onValid) {
             return onValid.apply(value);
         }

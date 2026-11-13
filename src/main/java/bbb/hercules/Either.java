@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An exclusive choice between a left value and a right value.
@@ -21,7 +22,7 @@ import lombok.NonNull;
  * @param <L> left-hand value type
  * @param <R> right-hand value type
  */
-public sealed interface Either<L, R> permits Either.Left, Either.Right {
+public sealed interface Either<L extends @Nullable Object, R extends @Nullable Object> permits Either.Left, Either.Right {
 
     /**
      * Eliminate the choice by handling both variants.
@@ -32,7 +33,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param onRight handler for the right-only variant
      * @return the result of the handler for the present variant
      */
-    <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+    <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                @NonNull Function<? super R, ? extends T> onRight);
 
     /**
@@ -43,7 +44,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param value value to wrap in the selected variant
      * @return a left-only value
      */
-    static <L, R> Either<L, R> left(L value) {
+    static <L extends @Nullable Object, R extends @Nullable Object> Either<L, R> left(L value) {
         return new Left<>(value);
     }
 
@@ -55,7 +56,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param value value to wrap in the selected variant
      * @return a right-only value
      */
-    static <L, R> Either<L, R> right(R value) {
+    static <L extends @Nullable Object, R extends @Nullable Object> Either<L, R> right(R value) {
         return new Right<>(value);
     }
 
@@ -66,7 +67,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param mapper payload mapping function; must not be null
      * @return a value with the right payload transformed if present
      */
-    default <T> Either<L, T> map(@NonNull Function<? super R, ? extends T> mapper) {
+    default <T extends @Nullable Object> Either<L, T> map(@NonNull Function<? super R, ? extends T> mapper) {
         return fold(
                 left -> Either.<L, T>left(left),
                 right -> Either.<L, T>right(mapper.apply(right)));
@@ -79,7 +80,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param mapper payload mapping function; must not be null
      * @return a value with the left payload transformed if present
      */
-    default <T> Either<T, R> mapLeft(@NonNull Function<? super L, ? extends T> mapper) {
+    default <T extends @Nullable Object> Either<T, R> mapLeft(@NonNull Function<? super L, ? extends T> mapper) {
         return fold(
                 left -> Either.<T, R>left(mapper.apply(left)),
                 right -> Either.<T, R>right(right));
@@ -94,7 +95,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param rightMapper mapping function for right values; must not be null
      * @return a value with whichever evidence payloads are present transformed
      */
-    default <A, B> Either<A, B> bimap(@NonNull Function<? super L, ? extends A> leftMapper,
+    default <A extends @Nullable Object, B extends @Nullable Object> Either<A, B> bimap(@NonNull Function<? super L, ? extends A> leftMapper,
                                      @NonNull Function<? super R, ? extends B> rightMapper) {
         return fold(
                 left -> Either.<A, B>left(leftMapper.apply(left)),
@@ -109,7 +110,7 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param binder right-biased dependent function; must not be null
      * @return the result of dependent right-biased computation
      */
-    default <T> Either<L, T> flatMap(@NonNull Function<? super R, ? extends Either<L, T>> binder) {
+    default <T extends @Nullable Object> Either<L, T> flatMap(@NonNull Function<? super R, ? extends Either<L, T>> binder) {
         return fold(
                 left -> Either.<L, T>left(left),
                 right -> Objects.requireNonNull(binder.apply(right), "flatMap returned null"));
@@ -174,10 +175,10 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param <R> right payload type
      * @param value value to wrap in the selected variant
      */
-    record Left<L, R>(L value) implements Either<L, R> {
+    record Left<L extends @Nullable Object, R extends @Nullable Object>(L value) implements Either<L, R> {
 
         @Override
-        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+        public <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                           @NonNull Function<? super R, ? extends T> onRight) {
             return onLeft.apply(value);
         }
@@ -190,10 +191,10 @@ public sealed interface Either<L, R> permits Either.Left, Either.Right {
      * @param <R> right payload type
      * @param value value to wrap in the selected variant
      */
-    record Right<L, R>(R value) implements Either<L, R> {
+    record Right<L extends @Nullable Object, R extends @Nullable Object>(R value) implements Either<L, R> {
 
         @Override
-        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+        public <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                           @NonNull Function<? super R, ? extends T> onRight) {
             return onRight.apply(value);
         }

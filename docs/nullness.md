@@ -23,7 +23,11 @@ Validation<String, @Nullable Integer> validNull = Validation.valid(null);
 Generic payloads (`L`, `R`, `E`, `A`, and the argument/result type
 parameters of `F3`–`F10`) must **not** acquire unconditional Lombok
 `@NonNull` checks in their record components or factories. Such checks
-would break explicitly nullable generic specializations.
+would break explicitly nullable generic specializations. A generic
+parameter that permits nullable instantiations is declared as
+`<T extends @Nullable Object>`; this is a **bound on the type parameter**,
+not permission to pass null when instantiated with a non-null type:
+`Either<String, Integer>` still rejects null at statically checked call sites.
 
 `Left(null)`, `Right(null)`, `Both(null,null)`,
 `Neither(null)`, `Invalid(null)`, and `Valid(null)` remain
@@ -35,10 +39,9 @@ and `EitherChoice.emptyLeft` follow the same generic-payload rule.
 `Either.toOptional()` intentionally produces `Optional.empty()` for
 `Right(null)`, which is a documented lossy conversion.
 
-JSpecify describes static contracts. It does **not** automatically
-check incoming null values or callback results at runtime. Automated
-static nullness analysis is tracked separately in #41; do not confuse a
-successful Java compilation with full JSpecify enforcement.
+JSpecify describes static contracts, not runtime checks. The Maven build
+now enforces its statically checkable contracts with NullAway, as described
+below. Compilation does not add runtime validation of generic payloads.
 
 ## Lombok: runtime checks on structural references
 
@@ -133,5 +136,43 @@ defensive validation.
 
 The canonical Java package is `bbb.hercules` (#36); its relocated
 `package-info.java` retains `@NullMarked`. New subpackages require their
-own package-level nullness declaration. Static nullness analysis is #41.
-The policy was established in #35.
+own package-level nullness declaration. Static analysis was introduced in
+#41; the underlying runtime nullness policy was established in #35.
+
+## Static verification: NullAway in Maven and CI (#41)
+
+`./mvnw verify` runs NullAway **in JSpecify mode**, through Error Prone,
+for every production Java file in `src/main/java`. This includes the
+checked-in, generator-produced `F3`–`F10` interfaces. No blanket nullness
+suppressions have been introduced. Intentionally nullable payloads use
+JSpecify `@Nullable` type arguments and `extends @Nullable Object` bounds;
+structural callback references remain non-null by default.
+
+We use `nullability-maven-plugin` 0.5.2 to integrate with the existing
+Maven compiler configuration (including Lombok), NullAway 0.14.2, and
+Error Prone 2.42.0. The latter is pinned because later Error Prone
+releases require JDK 21 to run; Hercules retains Java 17-compatible builds.
+JSpecify mode on JDK 17 and 21 requires recent OpenJDK/Temurin versions
+(17.0.19+ / 21.0.8+) and `-XDaddTypeAnnotationsToSymbol=true`;
+the plugin supplies that flag. JDK 25 can run without it. The CI matrix
+compiles and verifies under 17, 21 and 25 while emitting Java 17 bytecode.
+
+The trade-off versus Checker Framework is fast, incremental Error Prone
+integration and light annotation maintenance, at the cost of NullAway's
+known incomplete coverage of generic inference and some generic-class
+internals. Static analysis is valuable, but not a proof of total null safety.
+The normal build checks production sources; deliberately nullable JUnit
+runtime tests remain separate from the static check. See also
+https://github.com/uber/NullAway/wiki/JSpecify-Support.
+
+Run `./scripts/verify-nullness.sh` to exercise both **positive** and
+**negative** external consumer source fixtures in disposable Maven builds:
+- Explicitly nullable `Either`, `These`, `Those`, `Validation`, `F3`,
+  and `ValidationApplicative.sequence`/`traverse` payloads must compile.
+- A null return, a null non-null generic payload and a null required
+  callback must each generate a NullAway compilation diagnostic.
+
+The CI matrix runs this script after the standard `verify`. It uses copies
+of sources, not temporary mutations of the working tree, so the tests cannot
+leave broken Java files behind. Lombok `@NonNull` checks remain a distinct
+**runtime** defense and are never replaced by compiler checking.

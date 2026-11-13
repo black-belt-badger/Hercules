@@ -5,6 +5,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An explicit choice policy for {@link Either}: prefer the first successful
@@ -24,7 +25,7 @@ import lombok.NonNull;
  * @param combineLeft associative operation for two left values, in encounter order
  * @param <L> left-hand information carried by unsuccessful alternatives
  */
-public record EitherChoice<L>(L emptyLeft, @NonNull BinaryOperator<L> combineLeft) {
+public record EitherChoice<L extends @Nullable Object>(L emptyLeft, @NonNull BinaryOperator<L> combineLeft) {
 
     /**
      * Return the identity for choice.
@@ -32,7 +33,7 @@ public record EitherChoice<L>(L emptyLeft, @NonNull BinaryOperator<L> combineLef
      * @param <R> right payload type
      * @return the left-only identity of this choice policy
      */
-    public <R> Either<L, R> empty() {
+    public <R extends @Nullable Object> Either<L, R> empty() {
         return Either.left(emptyLeft);
     }
 
@@ -46,7 +47,7 @@ public record EitherChoice<L>(L emptyLeft, @NonNull BinaryOperator<L> combineLef
      * @param second second alternative or lazy fallback
      * @return the first successful alternative, or combined left values
      */
-    public <R> Either<L, R> choose(@NonNull Either<L, R> first, @NonNull Either<L, R> second) {
+    public <R extends @Nullable Object> Either<L, R> choose(@NonNull Either<L, R> first, @NonNull Either<L, R> second) {
         return choose(first, () -> second);
     }
 
@@ -60,7 +61,7 @@ public record EitherChoice<L>(L emptyLeft, @NonNull BinaryOperator<L> combineLef
      * @param second second alternative or lazy fallback
      * @return the first successful alternative, or combined left values
      */
-    public <R> Either<L, R> choose(
+    public <R extends @Nullable Object> Either<L, R> choose(
             @NonNull Either<L, R> first, @NonNull Supplier<? extends Either<L, R>> second) {
         return first.fold(
                 left -> Objects.requireNonNull(second.get(), "choice returned null").fold(

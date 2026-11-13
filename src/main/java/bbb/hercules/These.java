@@ -6,6 +6,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Inclusive choice: only a left value ({@link This}), only a right value
@@ -22,7 +23,7 @@ import lombok.NonNull;
  * @param <L> the left-hand value type, often diagnostics or warnings
  * @param <R> the right-hand value type, often a computed result
  */
-public sealed interface These<L, R> permits These.This, These.That, These.Both {
+public sealed interface These<L extends @Nullable Object, R extends @Nullable Object> permits These.This, These.That, These.Both {
 
     /**
      * Eliminate every variant. All three handlers must be non-null; only
@@ -34,7 +35,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param onBoth handler for the both-values variant
      * @return the result of the handler for the present variant
      */
-    <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+    <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                @NonNull Function<? super R, ? extends T> onRight,
                @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth);
 
@@ -46,7 +47,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param value value to wrap in the selected variant
      * @return a left-only value
      */
-    static <L, R> These<L, R> left(L value) {
+    static <L extends @Nullable Object, R extends @Nullable Object> These<L, R> left(L value) {
         return new This<>(value);
     }
 
@@ -58,7 +59,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param value value to wrap in the selected variant
      * @return a right-only value
      */
-    static <L, R> These<L, R> right(R value) {
+    static <L extends @Nullable Object, R extends @Nullable Object> These<L, R> right(R value) {
         return new That<>(value);
     }
 
@@ -71,7 +72,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param right right payload
      * @return a value containing both payloads
      */
-    static <L, R> These<L, R> both(L left, R right) {
+    static <L extends @Nullable Object, R extends @Nullable Object> These<L, R> both(L left, R right) {
         return new Both<>(left, right);
     }
 
@@ -82,7 +83,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param mapper payload mapping function; must not be null
      * @return a value with the right payload transformed if present
      */
-    default <T> These<L, T> map(@NonNull Function<? super R, ? extends T> mapper) {
+    default <T extends @Nullable Object> These<L, T> map(@NonNull Function<? super R, ? extends T> mapper) {
         return fold(
                 These::left,
                 value -> These.right(mapper.apply(value)),
@@ -96,7 +97,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param mapper payload mapping function; must not be null
      * @return a value with the left payload transformed if present
      */
-    default <T> These<T, R> mapLeft(@NonNull Function<? super L, ? extends T> mapper) {
+    default <T extends @Nullable Object> These<T, R> mapLeft(@NonNull Function<? super L, ? extends T> mapper) {
         return fold(
                 value -> These.left(mapper.apply(value)),
                 These::right,
@@ -112,7 +113,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param rightMapper mapping function for right values; must not be null
      * @return a value with whichever evidence payloads are present transformed
      */
-    default <A, B> These<A, B> bimap(
+    default <A extends @Nullable Object, B extends @Nullable Object> These<A, B> bimap(
             @NonNull Function<? super L, ? extends A> leftMapper,
             @NonNull Function<? super R, ? extends B> rightMapper) {
         return fold(
@@ -138,7 +139,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param <E> explanation type of the target Those; no explanation is created
      * @return the corresponding This, That or Both variant
      */
-    default <E> Those<L, R, E> toThose() {
+    default <E extends @Nullable Object> Those<L, R, E> toThose() {
         return fold(Those::left, Those::right, Those::both);
     }
 
@@ -159,7 +160,7 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param combineLeft associative left-value combiner; must not be null
      * @return the result of dependent right-biased computation
      */
-    default <T> These<L, T> flatMap(
+    default <T extends @Nullable Object> These<L, T> flatMap(
             @NonNull Function<? super R, ? extends These<L, T>> binder,
             @NonNull BinaryOperator<L> combineLeft) {
         return fold(
@@ -183,10 +184,10 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param <R> right payload type
      * @param value value to wrap in the selected variant
      */
-    record This<L, R>(L value) implements These<L, R> {
+    record This<L extends @Nullable Object, R extends @Nullable Object>(L value) implements These<L, R> {
 
         @Override
-        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+        public <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                           @NonNull Function<? super R, ? extends T> onRight,
                           @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth) {
             return onLeft.apply(value);
@@ -200,10 +201,10 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param <R> right payload type
      * @param value value to wrap in the selected variant
      */
-    record That<L, R>(R value) implements These<L, R> {
+    record That<L extends @Nullable Object, R extends @Nullable Object>(R value) implements These<L, R> {
 
         @Override
-        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+        public <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                           @NonNull Function<? super R, ? extends T> onRight,
                           @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth) {
             return onRight.apply(value);
@@ -218,10 +219,10 @@ public sealed interface These<L, R> permits These.This, These.That, These.Both {
      * @param left left payload
      * @param right right payload
      */
-    record Both<L, R>(L left, R right) implements These<L, R> {
+    record Both<L extends @Nullable Object, R extends @Nullable Object>(L left, R right) implements These<L, R> {
 
         @Override
-        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+        public <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                           @NonNull Function<? super R, ? extends T> onRight,
                           @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth) {
             return onBoth.apply(left, right);

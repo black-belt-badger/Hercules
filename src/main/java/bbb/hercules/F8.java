@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A function of 8 arguments, compatible with JDK unary and binary functions.
@@ -25,7 +26,7 @@ import lombok.NonNull;
  * @param <R> result type
  */
 @FunctionalInterface
-public interface F8<A, B, C, D, E, F, G, H, R> {
+public interface F8<A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, E extends @Nullable Object, F extends @Nullable Object, G extends @Nullable Object, H extends @Nullable Object, R extends @Nullable Object> {
 
     /**
      * Evaluate the function using all arguments.
@@ -49,7 +50,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param mapper result transformation, required at composition time
      * @return a lazily mapped function
      */
-    default <S> F8<A, B, C, D, E, F, G, H, S> map(@NonNull Function<? super R, ? extends S> mapper) {
+    default <S extends @Nullable Object> F8<A, B, C, D, E, F, G, H, S> map(@NonNull Function<? super R, ? extends S> mapper) {
         return (a, b, c, d, e, f, g, h) -> mapper.apply(apply(a, b, c, d, e, f, g, h));
     }
 
@@ -60,7 +61,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param binder maps a result to another function with the same inputs
      * @return a lazily composed function
      */
-    default <S> F8<A, B, C, D, E, F, G, H, S> flatMap(
+    default <S extends @Nullable Object> F8<A, B, C, D, E, F, G, H, S> flatMap(
             @NonNull Function<? super R, ? extends F8<A, B, C, D, E, F, G, H, S>> binder) {
         return (a, b, c, d, e, f, g, h) -> Objects.requireNonNull(binder.apply(apply(a, b, c, d, e, f, g, h)),
                 "flatMap returned a null function").apply(a, b, c, d, e, f, g, h);
@@ -164,7 +165,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param before transformation to the original argument 1 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F8<Z, B, C, D, E, F, G, H, R> compose1(
+    default <Z extends @Nullable Object> F8<Z, B, C, D, E, F, G, H, R> compose1(
             @NonNull Function<? super Z, ? extends A> before) {
         return (a, b, c, d, e, f, g, h) -> apply(before.apply(a), b, c, d, e, f, g, h);
     }
@@ -176,7 +177,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param before transformation to the original argument 2 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F8<A, Z, C, D, E, F, G, H, R> compose2(
+    default <Z extends @Nullable Object> F8<A, Z, C, D, E, F, G, H, R> compose2(
             @NonNull Function<? super Z, ? extends B> before) {
         return (a, b, c, d, e, f, g, h) -> apply(a, before.apply(b), c, d, e, f, g, h);
     }
@@ -188,7 +189,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param before transformation to the original argument 3 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F8<A, B, Z, D, E, F, G, H, R> compose3(
+    default <Z extends @Nullable Object> F8<A, B, Z, D, E, F, G, H, R> compose3(
             @NonNull Function<? super Z, ? extends C> before) {
         return (a, b, c, d, e, f, g, h) -> apply(a, b, before.apply(c), d, e, f, g, h);
     }
@@ -200,7 +201,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param before transformation to the original argument 4 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F8<A, B, C, Z, E, F, G, H, R> compose4(
+    default <Z extends @Nullable Object> F8<A, B, C, Z, E, F, G, H, R> compose4(
             @NonNull Function<? super Z, ? extends D> before) {
         return (a, b, c, d, e, f, g, h) -> apply(a, b, c, before.apply(d), e, f, g, h);
     }
@@ -212,7 +213,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param before transformation to the original argument 5 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F8<A, B, C, D, Z, F, G, H, R> compose5(
+    default <Z extends @Nullable Object> F8<A, B, C, D, Z, F, G, H, R> compose5(
             @NonNull Function<? super Z, ? extends E> before) {
         return (a, b, c, d, e, f, g, h) -> apply(a, b, c, d, before.apply(e), f, g, h);
     }
@@ -224,7 +225,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param before transformation to the original argument 6 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F8<A, B, C, D, E, Z, G, H, R> compose6(
+    default <Z extends @Nullable Object> F8<A, B, C, D, E, Z, G, H, R> compose6(
             @NonNull Function<? super Z, ? extends F> before) {
         return (a, b, c, d, e, f, g, h) -> apply(a, b, c, d, e, before.apply(f), g, h);
     }
@@ -236,7 +237,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param before transformation to the original argument 7 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F8<A, B, C, D, E, F, Z, H, R> compose7(
+    default <Z extends @Nullable Object> F8<A, B, C, D, E, F, Z, H, R> compose7(
             @NonNull Function<? super Z, ? extends G> before) {
         return (a, b, c, d, e, f, g, h) -> apply(a, b, c, d, e, f, before.apply(g), h);
     }
@@ -248,7 +249,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param before transformation to the original argument 8 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F8<A, B, C, D, E, F, G, Z, R> compose8(
+    default <Z extends @Nullable Object> F8<A, B, C, D, E, F, G, Z, R> compose8(
             @NonNull Function<? super Z, ? extends H> before) {
         return (a, b, c, d, e, f, g, h) -> apply(a, b, c, d, e, f, g, before.apply(h));
     }
@@ -277,7 +278,7 @@ public interface F8<A, B, C, D, E, F, G, H, R> {
      * @param function a curried function accepting all arguments
      * @return an uncurried multi-argument function
      */
-    static <A, B, C, D, E, F, G, H, R> F8<A, B, C, D, E, F, G, H, R> uncurry(@NonNull Function<A, Function<B, Function<C, Function<D, Function<E, Function<F, Function<G, Function<H, R>>>>>>>> function) {
+    static <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, E extends @Nullable Object, F extends @Nullable Object, G extends @Nullable Object, H extends @Nullable Object, R extends @Nullable Object> F8<A, B, C, D, E, F, G, H, R> uncurry(@NonNull Function<A, Function<B, Function<C, Function<D, Function<E, Function<F, Function<G, Function<H, R>>>>>>>> function) {
         return (a, b, c, d, e, f, g, h) -> function.apply(a).apply(b).apply(c).apply(d).apply(e).apply(f).apply(g).apply(h);
     }
 }

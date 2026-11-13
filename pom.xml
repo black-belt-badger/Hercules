@@ -85,6 +85,24 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>am.ik.maven</groupId>
+                <artifactId>nullability-maven-plugin</artifactId>
+                <version>0.5.2</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <!-- Error Prone 2.42 is the last release that runs on JDK 17. -->
+                    <errorProneVersion>2.42.0</errorProneVersion>
+                    <nullAwayVersion>0.14.2</nullAwayVersion>
+                    <jspecifyMode>true</jspecifyMode>
+                    <checking>main</checking>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals><goal>configure</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.6.1</version>

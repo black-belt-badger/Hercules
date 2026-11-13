@@ -6,6 +6,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A function of 4 arguments, compatible with JDK unary and binary functions.
@@ -21,7 +22,7 @@ import lombok.NonNull;
  * @param <R> result type
  */
 @FunctionalInterface
-public interface F4<A, B, C, D, R> {
+public interface F4<A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, R extends @Nullable Object> {
 
     /**
      * Evaluate the function using all arguments.
@@ -41,7 +42,7 @@ public interface F4<A, B, C, D, R> {
      * @param mapper result transformation, required at composition time
      * @return a lazily mapped function
      */
-    default <S> F4<A, B, C, D, S> map(@NonNull Function<? super R, ? extends S> mapper) {
+    default <S extends @Nullable Object> F4<A, B, C, D, S> map(@NonNull Function<? super R, ? extends S> mapper) {
         return (a, b, c, d) -> mapper.apply(apply(a, b, c, d));
     }
 
@@ -52,7 +53,7 @@ public interface F4<A, B, C, D, R> {
      * @param binder maps a result to another function with the same inputs
      * @return a lazily composed function
      */
-    default <S> F4<A, B, C, D, S> flatMap(
+    default <S extends @Nullable Object> F4<A, B, C, D, S> flatMap(
             @NonNull Function<? super R, ? extends F4<A, B, C, D, S>> binder) {
         return (a, b, c, d) -> Objects.requireNonNull(binder.apply(apply(a, b, c, d)),
                 "flatMap returned a null function").apply(a, b, c, d);
@@ -98,7 +99,7 @@ public interface F4<A, B, C, D, R> {
      * @param before transformation to the original argument 1 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F4<Z, B, C, D, R> compose1(
+    default <Z extends @Nullable Object> F4<Z, B, C, D, R> compose1(
             @NonNull Function<? super Z, ? extends A> before) {
         return (a, b, c, d) -> apply(before.apply(a), b, c, d);
     }
@@ -110,7 +111,7 @@ public interface F4<A, B, C, D, R> {
      * @param before transformation to the original argument 2 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F4<A, Z, C, D, R> compose2(
+    default <Z extends @Nullable Object> F4<A, Z, C, D, R> compose2(
             @NonNull Function<? super Z, ? extends B> before) {
         return (a, b, c, d) -> apply(a, before.apply(b), c, d);
     }
@@ -122,7 +123,7 @@ public interface F4<A, B, C, D, R> {
      * @param before transformation to the original argument 3 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F4<A, B, Z, D, R> compose3(
+    default <Z extends @Nullable Object> F4<A, B, Z, D, R> compose3(
             @NonNull Function<? super Z, ? extends C> before) {
         return (a, b, c, d) -> apply(a, b, before.apply(c), d);
     }
@@ -134,7 +135,7 @@ public interface F4<A, B, C, D, R> {
      * @param before transformation to the original argument 4 type
      * @return a function accepting the transformed argument
      */
-    default <Z> F4<A, B, C, Z, R> compose4(
+    default <Z extends @Nullable Object> F4<A, B, C, Z, R> compose4(
             @NonNull Function<? super Z, ? extends D> before) {
         return (a, b, c, d) -> apply(a, b, c, before.apply(d));
     }
@@ -159,7 +160,7 @@ public interface F4<A, B, C, D, R> {
      * @param function a curried function accepting all arguments
      * @return an uncurried multi-argument function
      */
-    static <A, B, C, D, R> F4<A, B, C, D, R> uncurry(@NonNull Function<A, Function<B, Function<C, Function<D, R>>>> function) {
+    static <A extends @Nullable Object, B extends @Nullable Object, C extends @Nullable Object, D extends @Nullable Object, R extends @Nullable Object> F4<A, B, C, D, R> uncurry(@NonNull Function<A, Function<B, Function<C, Function<D, R>>>> function) {
         return (a, b, c, d) -> function.apply(a).apply(b).apply(c).apply(d);
     }
 }

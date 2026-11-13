@@ -5,6 +5,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Two possible kinds of evidence, together with an explanation when neither is present.
@@ -25,7 +26,7 @@ import lombok.NonNull;
  * @param <R> right evidence type
  * @param <E> explanation type for neither kind of evidence
  */
-public sealed interface Those<L, R, E>
+public sealed interface Those<L extends @Nullable Object, R extends @Nullable Object, E extends @Nullable Object>
         permits Those.This, Those.That, Those.Both, Those.Neither {
 
     /**
@@ -38,7 +39,7 @@ public sealed interface Those<L, R, E>
      * @param onNeither handler for the neither variant
      * @return the result of the handler for the present variant
      */
-    <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+    <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                @NonNull Function<? super R, ? extends T> onRight,
                @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth,
                @NonNull Function<? super E, ? extends T> onNeither);
@@ -52,7 +53,7 @@ public sealed interface Those<L, R, E>
      * @param value value to wrap in the selected variant
      * @return a left-only value
      */
-    static <L, R, E> Those<L, R, E> left(L value) {
+    static <L extends @Nullable Object, R extends @Nullable Object, E extends @Nullable Object> Those<L, R, E> left(L value) {
         return new This<>(value);
     }
 
@@ -65,7 +66,7 @@ public sealed interface Those<L, R, E>
      * @param value value to wrap in the selected variant
      * @return a right-only value
      */
-    static <L, R, E> Those<L, R, E> right(R value) {
+    static <L extends @Nullable Object, R extends @Nullable Object, E extends @Nullable Object> Those<L, R, E> right(R value) {
         return new That<>(value);
     }
 
@@ -79,7 +80,7 @@ public sealed interface Those<L, R, E>
      * @param right right payload
      * @return a value containing both payloads
      */
-    static <L, R, E> Those<L, R, E> both(L left, R right) {
+    static <L extends @Nullable Object, R extends @Nullable Object, E extends @Nullable Object> Those<L, R, E> both(L left, R right) {
         return new Both<>(left, right);
     }
 
@@ -92,7 +93,7 @@ public sealed interface Those<L, R, E>
      * @param explanation typed explanation for the absence of both evidence types
      * @return a value representing neither evidence type
      */
-    static <L, R, E> Those<L, R, E> neither(E explanation) {
+    static <L extends @Nullable Object, R extends @Nullable Object, E extends @Nullable Object> Those<L, R, E> neither(E explanation) {
         return new Neither<>(explanation);
     }
 
@@ -103,7 +104,7 @@ public sealed interface Those<L, R, E>
      * @param mapper payload mapping function; must not be null
      * @return a value with the right payload transformed if present
      */
-    default <T> Those<L, T, E> map(@NonNull Function<? super R, ? extends T> mapper) {
+    default <T extends @Nullable Object> Those<L, T, E> map(@NonNull Function<? super R, ? extends T> mapper) {
         return fold(
                 Those::left,
                 right -> Those.right(mapper.apply(right)),
@@ -118,7 +119,7 @@ public sealed interface Those<L, R, E>
      * @param mapper payload mapping function; must not be null
      * @return a value with the left payload transformed if present
      */
-    default <T> Those<T, R, E> mapLeft(@NonNull Function<? super L, ? extends T> mapper) {
+    default <T extends @Nullable Object> Those<T, R, E> mapLeft(@NonNull Function<? super L, ? extends T> mapper) {
         return fold(
                 left -> Those.left(mapper.apply(left)),
                 Those::right,
@@ -133,7 +134,7 @@ public sealed interface Those<L, R, E>
      * @param mapper payload mapping function; must not be null
      * @return a value with the explanation transformed if present
      */
-    default <T> Those<L, R, T> mapNeither(@NonNull Function<? super E, ? extends T> mapper) {
+    default <T extends @Nullable Object> Those<L, R, T> mapNeither(@NonNull Function<? super E, ? extends T> mapper) {
         return fold(
                 Those::left,
                 Those::right,
@@ -150,7 +151,7 @@ public sealed interface Those<L, R, E>
      * @param rightMapper mapping function for right values; must not be null
      * @return a value with whichever evidence payloads are present transformed
      */
-    default <C, D> Those<C, D, E> bimap(
+    default <C extends @Nullable Object, D extends @Nullable Object> Those<C, D, E> bimap(
             @NonNull Function<? super L, ? extends C> leftMapper,
             @NonNull Function<? super R, ? extends D> rightMapper) {
         return fold(
@@ -171,7 +172,7 @@ public sealed interface Those<L, R, E>
      * @param neitherMapper mapping function for absence explanations; must not be null
      * @return a value with all applicable payloads transformed
      */
-    default <C, D, F> Those<C, D, F> trimap(
+    default <C extends @Nullable Object, D extends @Nullable Object, F extends @Nullable Object> Those<C, D, F> trimap(
             @NonNull Function<? super L, ? extends C> leftMapper,
             @NonNull Function<? super R, ? extends D> rightMapper,
             @NonNull Function<? super E, ? extends F> neitherMapper) {
@@ -217,7 +218,7 @@ public sealed interface Those<L, R, E>
      * @param value value to wrap in the selected variant
      * @return the matching four-way value
      */
-    static <L, R, E> Those<L, R, E> fromEither(@NonNull Either<E, These<L, R>> value) {
+    static <L extends @Nullable Object, R extends @Nullable Object, E extends @Nullable Object> Those<L, R, E> fromEither(@NonNull Either<E, These<L, R>> value) {
         return value.fold(
                 Those::neither,
                 evidence -> Objects.requireNonNull(evidence, "evidence").fold(
@@ -234,9 +235,9 @@ public sealed interface Those<L, R, E>
      * @param <E> typed explanation for absence
      * @param value value to wrap in the selected variant
      */
-    record This<L, R, E>(L value) implements Those<L, R, E> {
+    record This<L extends @Nullable Object, R extends @Nullable Object, E extends @Nullable Object>(L value) implements Those<L, R, E> {
         @Override
-        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+        public <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                           @NonNull Function<? super R, ? extends T> onRight,
                           @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth,
                           @NonNull Function<? super E, ? extends T> onNeither) {
@@ -252,9 +253,9 @@ public sealed interface Those<L, R, E>
      * @param <E> typed explanation for absence
      * @param value value to wrap in the selected variant
      */
-    record That<L, R, E>(R value) implements Those<L, R, E> {
+    record That<L extends @Nullable Object, R extends @Nullable Object, E extends @Nullable Object>(R value) implements Those<L, R, E> {
         @Override
-        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+        public <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                           @NonNull Function<? super R, ? extends T> onRight,
                           @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth,
                           @NonNull Function<? super E, ? extends T> onNeither) {
@@ -271,9 +272,9 @@ public sealed interface Those<L, R, E>
      * @param left left payload
      * @param right right payload
      */
-    record Both<L, R, E>(L left, R right) implements Those<L, R, E> {
+    record Both<L extends @Nullable Object, R extends @Nullable Object, E extends @Nullable Object>(L left, R right) implements Those<L, R, E> {
         @Override
-        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+        public <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                           @NonNull Function<? super R, ? extends T> onRight,
                           @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth,
                           @NonNull Function<? super E, ? extends T> onNeither) {
@@ -289,9 +290,9 @@ public sealed interface Those<L, R, E>
      * @param <E> typed explanation for absence
      * @param explanation typed explanation for the absence of both evidence types
      */
-    record Neither<L, R, E>(E explanation) implements Those<L, R, E> {
+    record Neither<L extends @Nullable Object, R extends @Nullable Object, E extends @Nullable Object>(E explanation) implements Those<L, R, E> {
         @Override
-        public <T> T fold(@NonNull Function<? super L, ? extends T> onLeft,
+        public <T extends @Nullable Object> T fold(@NonNull Function<? super L, ? extends T> onLeft,
                           @NonNull Function<? super R, ? extends T> onRight,
                           @NonNull BiFunction<? super L, ? super R, ? extends T> onBoth,
                           @NonNull Function<? super E, ? extends T> onNeither) {

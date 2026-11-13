@@ -23,3 +23,5 @@ jobs:
           cache: maven
       - name: Verify Java 17-compatible library
         run: ./mvnw -B -ntp verify
+      - name: Prove JSpecify contracts fail compilation when violated
+        run: ./scripts/verify-nullness.sh
