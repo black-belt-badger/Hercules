@@ -49,4 +49,13 @@ public final class NullableConsumer {
         return app.<@Nullable String, @Nullable Integer>traverse(
                 inputs, item -> Validation.<String, @Nullable Integer>valid(null));
     }
+
+    public static Validation<String, @Nullable Integer> nullableMap3() {
+        var app = new ValidationApplicative<String>((a, b) -> a + b);
+        return app.<@Nullable String, Integer, Integer, @Nullable Integer>map3(
+                Validation.<String, @Nullable String>valid(null),
+                Validation.<String, Integer>valid(2),
+                Validation.<String, Integer>valid(3),
+                (first, second, third) -> null);
+    }
 }

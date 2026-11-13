@@ -123,6 +123,50 @@ cancel work. They only combine their completed `Validation` arguments.
 For parallel asynchronous checks and cancellation, see the later
 `CompletionStage` work in #9.
 
+## Arity-aware map3 through map10
+
+When combining a fixed number of independent validations, the methods
+`map3`–`map10` accept Hercules' existing `F3`–`F10` functional
+interfaces. `map2` continues to use the JDK `BiFunction`.
+
+```java
+record Order(String symbol, int quantity, BigDecimal price) {}
+
+Validation<List<String>, Order> order = app.map3(
+        Validation.valid("BTC"),
+        Validation.invalid(List.of("quantity must be positive")),
+        Validation.invalid(List.of("price must be positive")),
+        Order::new);
+// Invalid(["quantity must be positive", "price must be positive"])
+```
+
+Each argument is an **already computed** `Validation`. All container
+and mapper references must be non-null and are checked eagerly, even
+when earlier validations are invalid. The corresponding `map3`–`map10`
+method never invokes its mapper unless all inputs are `Valid`; then it invokes it exactly
+once with payloads in the original order. Errors accumulate left to
+right, once per additional `Invalid`, using the caller-supplied
+associative `combineErrors`. Error order is meaningful; an identity
+element and commutativity are **not** required.
+
+Heterogeneous payload types work naturally with constructors and
+lambdas. Explicitly nullable successful payload and result types
+remain supported, including a mapper that intentionally returns null.
+Exceptions from the mapper or error combiner propagate without being
+converted into validation errors.
+
+Under the hood, `map3`–`map10` are generated from
+`scripts/generate_validation_mapn.py` and delegate to `pure`,
+`ap` and the appropriate `F3`–`F10` `curried()` method. This ensures their
+accumulation semantics are the same lawful Applicative operations;
+there are no unchecked casts, runtime tuple objects, or new typeclass
+hierarchies. Change the **generator**, not the marked Java method
+region.
+
+`mapN` is useful for a fixed known number of heterogeneous fields;
+`sequence` and `traverse` below are better for a variable number
+of homogeneous checks.
+
 ## Sequence and traverse — many independent validations
 
 `sequence` collects an iterable of already computed validations into
@@ -217,10 +261,10 @@ rather than the independent accumulation that distinguishes this type.
 Hercules therefore leaves `flatMap` out of this increment instead of
 promising incompatible algebraic laws.
 
-Arity-aware `mapN` and asynchronous `CompletionStage`
-combinations remain separately reviewed #9 subtasks; concurrent
-composition must state ordering, exception and cancellation semantics
-explicitly.
+Asynchronous `CompletionStage` combinations remain a separate #9
+subtask; concurrent composition must state ordering, exception and
+cancellation semantics explicitly. Synchronous `map3`–`map10`
+are implemented above.
 
 ## Verification
 
@@ -235,7 +279,11 @@ constructors. `ValidationTraversalLawsTest` and
 `ValidationTraversalBehaviorTest` check ordered accumulation, mapping
 coherence, empty/singleton cases, no short-circuiting, null contracts,
 single traversal, immutable results and error propagation.
-`ValidationPublicApiTest` and `ValidationTraversalPublicApiTest`
+`ValidationMapNLawsTest` exercises all failure subsets from
+arity three through ten with Instancio-generated values and checks
+error order, exactly-once mapping, error/mapper exceptions, non-null
+container contracts and nullable result types. `ValidationPublicApiTest`,
+`ValidationTraversalPublicApiTest`, and `ValidationMapNPublicApiTest`
 compile and run from an independent Java package.
 
 ```bash
@@ -243,4 +291,5 @@ compile and run from an independent Java package.
 ```
 
 Java 17 is the baseline; CI also verifies Java 21 and Java 25.
-Parent: #9. Accumulating Applicative: #39; sequence/traverse: #54.
+Parent: #9. Accumulating Applicative: #39; sequence/traverse: #54;
+arity-aware map3–map10: #56.
