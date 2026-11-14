@@ -158,8 +158,10 @@ introduced. The Writer record stores a *completed* value and output.
 
 Use Writer when pure business steps need to **return diagnostics,
 formatted fragments or provenance in addition to values**. Interpret
-those outputs separately, for example by sending them to a logger at
-an application boundary.
+those outputs separately. For typed diagnostic events and explicitly
+redacted, bounded backend emission, see [structured logging](logging.md).
+A Writer can carry `DList<LogEvent>` without invoking a logger until
+the application deliberately calls `LogInterpreter`.
 
 Use ordinary return values or `DList` alone when no dependent
 value sequencing is needed. Use `Validation` to accumulate
