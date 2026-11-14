@@ -148,8 +148,8 @@ verified in an executable test.
 
 This is **not** a stack-safe interpreter for arbitrary recursive
 user code. If a binder recursively calls itself, those nested Java
-calls can still exhaust the JVM stack. Use a separately designed
-trampoline (#4) where a computation requires deferred recursion.
+calls can still exhaust the JVM stack. Use the separate
+[Trampoline](trampoline.md) (#4) where a computation requires deferred recursion.
 
 No memoization, concurrency, cancellation, retry or scheduling is
 introduced. The Writer record stores a *completed* value and output.
