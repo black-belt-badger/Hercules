@@ -26,6 +26,7 @@
 - **Reader**: `Reader<R,A>` for explicit configuration/context-dependent computations, with lazy `run`, `map`, `flatMap`, `ask`, `asks`, `local` and `pure`. Deep nested composition is subject to the JVM stack limit; see the [Reader guide](docs/reader.md) and the runnable depth probe.
 - **State**: `State<S,A>` for explicit immutable state transitions with `run`, `eval`, `exec`, `map`, `flatMap`, `get`, `put`, `modify`, `gets` and `pure`. Dependent computations receive updated state; `State.Result<S,A>` and non-null `State.Unit` express transitions. See the [State guide](docs/state.md).
 - **Stack-safe Trampoline**: `Trampoline<A>` with `done`, `more`, `map`, `flatMap` and iterative `run` for tail and mutual recursion as well as million-step bind chains. A private typed bind node avoids nested Java calls and unchecked casts. This is synchronous, not an async runtime. Includes a loop/allocations benchmark; see the [Trampoline guide](docs/trampoline.md).
+- **Structured logging as data**: immutable `LogEvent` with typed fields, explicit timestamps, severity and context, safe redacting `LogFormatter`, and bounded synchronous `LogInterpreter` for test collection, silence and caller-selected backend emission. Sampling, failure policies and delivery limits are explicit; no mandatory logging backend. See the [logging guide](docs/logging.md).
 
 ## Areas under consideration
 
@@ -59,7 +60,7 @@ JSpecify `@NullMarked` is enabled for the initial package. **NullAway checks the
 
 ## Status
 
-`F3`–`F10`, `Either`, `These`, `Those`, `EitherChoice`, accumulating `Validation`, persistent `DList`, `Writer`, `Reader`, `State` and stack-safe `Trampoline` implemented. No published release yet.
+`F3`–`F10`, `Either`, `These`, `Those`, `EitherChoice`, accumulating `Validation`, persistent `DList`, `Writer`, `Reader`, `State`, stack-safe `Trampoline` and interpreted structured logging implemented. No published release yet.
 
 ## License
 
